@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Search } from "lucide-react";
 import { Suspense } from "react";
+import { FilterPanel } from "@/components/shop/filter-panel";
 import { ProductCard } from "@/components/shop/product-card";
 import {
   FORMS,
@@ -77,70 +79,88 @@ function Filters({
   query: CatalogQuery;
   categories: { name: string; slug: string }[];
 }) {
+  const activeCount = [query.category, query.form, query.grade, query.minPrice, query.maxPrice, query.inStock].filter(
+    (v) => v !== undefined,
+  ).length + (query.sort !== "popular" ? 1 : 0);
+
   return (
-    <form method="get" action="/shop" className="space-y-4 rounded-card bg-white p-5 shadow-soft lg:self-start">
-      <label className="block text-sm">
-        <span className="mb-1 block text-brown">Search</span>
-        <input name="q" defaultValue={query.q} maxLength={80} className={field} placeholder="e.g. W240" />
-      </label>
-      <label className="block text-sm">
-        <span className="mb-1 block text-brown">Category</span>
-        <select name="category" defaultValue={query.category ?? ""} className={field}>
-          <option value="">All</option>
-          {categories.map((c) => (
-            <option key={c.slug} value={c.slug}>{c.name}</option>
-          ))}
-        </select>
-      </label>
-      <label className="block text-sm">
-        <span className="mb-1 block text-brown">Type</span>
-        <select name="form" defaultValue={query.form ?? ""} className={field}>
-          <option value="">All</option>
-          {FORMS.map((f) => (
-            <option key={f} value={f}>{FORM_LABELS[f]}</option>
-          ))}
-        </select>
-      </label>
-      <label className="block text-sm">
-        <span className="mb-1 block text-brown">Grade</span>
-        <select name="grade" defaultValue={query.grade ?? ""} className={field}>
-          <option value="">All</option>
-          {GRADES.map((g) => (
-            <option key={g} value={g}>{GRADE_LABELS[g]}</option>
-          ))}
-        </select>
-      </label>
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <label>
-          <span className="mb-1 block text-brown">Min ₹</span>
-          <input name="minPrice" type="number" min={0} defaultValue={query.minPrice} className={field} />
-        </label>
-        <label>
-          <span className="mb-1 block text-brown">Max ₹</span>
-          <input name="maxPrice" type="number" min={0} defaultValue={query.maxPrice} className={field} />
-        </label>
-      </div>
-      <label className="flex items-center gap-2 text-sm text-chocolate">
-        <input type="checkbox" name="inStock" value="1" defaultChecked={query.inStock === "1"} />
-        In stock only
-      </label>
-      <label className="block text-sm">
-        <span className="mb-1 block text-brown">Sort by</span>
-        <select name="sort" defaultValue={query.sort} className={field}>
-          <option value="popular">Popularity</option>
-          <option value="newest">Newest</option>
-          <option value="price-asc">Price: low to high</option>
-          <option value="price-desc">Price: high to low</option>
-        </select>
-      </label>
-      <div className="flex gap-3">
-        <button type="submit" className="flex-1 rounded-full bg-forest px-4 py-2 text-sm text-cream">
-          Apply
+    <form method="get" action="/shop" className="space-y-3 lg:self-start lg:rounded-card lg:bg-white lg:p-5 lg:shadow-soft">
+      <div className="flex gap-2">
+        <label className="sr-only" htmlFor="shop-q">Search products</label>
+        <input
+          id="shop-q"
+          name="q"
+          type="search"
+          defaultValue={query.q}
+          maxLength={80}
+          className={field}
+          placeholder="Search cashews…"
+        />
+        <button type="submit" aria-label="Search" className="rounded-lg bg-forest px-3 text-cream">
+          <Search size={18} aria-hidden />
         </button>
-        <Link href="/shop" className="rounded-full border border-forest px-4 py-2 text-sm text-forest">
-          Reset
-        </Link>
       </div>
+
+      <FilterPanel activeCount={activeCount}>
+        <label className="block text-sm">
+          <span className="mb-1 block text-brown">Category</span>
+          <select name="category" defaultValue={query.category ?? ""} className={field}>
+            <option value="">All</option>
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>{c.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block text-brown">Type</span>
+          <select name="form" defaultValue={query.form ?? ""} className={field}>
+            <option value="">All</option>
+            {FORMS.map((f) => (
+              <option key={f} value={f}>{FORM_LABELS[f]}</option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block text-brown">Grade</span>
+          <select name="grade" defaultValue={query.grade ?? ""} className={field}>
+            <option value="">All</option>
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{GRADE_LABELS[g]}</option>
+            ))}
+          </select>
+        </label>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <label>
+            <span className="mb-1 block text-brown">Min ₹</span>
+            <input name="minPrice" type="number" min={0} defaultValue={query.minPrice} className={field} />
+          </label>
+          <label>
+            <span className="mb-1 block text-brown">Max ₹</span>
+            <input name="maxPrice" type="number" min={0} defaultValue={query.maxPrice} className={field} />
+          </label>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-chocolate">
+          <input type="checkbox" name="inStock" value="1" defaultChecked={query.inStock === "1"} />
+          In stock only
+        </label>
+        <label className="block text-sm">
+          <span className="mb-1 block text-brown">Sort by</span>
+          <select name="sort" defaultValue={query.sort} className={field}>
+            <option value="popular">Popularity</option>
+            <option value="newest">Newest</option>
+            <option value="price-asc">Price: low to high</option>
+            <option value="price-desc">Price: high to low</option>
+          </select>
+        </label>
+        <div className="flex gap-3">
+          <button type="submit" className="flex-1 rounded-full bg-forest px-4 py-2 text-sm text-cream">
+            Apply
+          </button>
+          <Link href="/shop" className="rounded-full border border-forest px-4 py-2 text-sm text-forest">
+            Reset
+          </Link>
+        </div>
+      </FilterPanel>
     </form>
   );
 }
