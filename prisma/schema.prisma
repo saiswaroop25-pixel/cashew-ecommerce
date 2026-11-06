@@ -1,0 +1,573 @@
+// Cashew e-commerce schema.
+// Conventions: money is stored as integer paise (INR minor units); every table has
+// createdAt/updatedAt; rows created by the seed script carry isDemo = true.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum CashewForm {
+  WHOLE
+  RAW
+  ROASTED
+  SALTED
+  FLAVOURED
+  BROKEN
+  PRODUCT // cashew-based products
+}
+
+enum CashewGrade {
+  W180
+  W240
+  W320
+  W450
+  BROKEN_BB // broken grades
+  BROKEN_LWP
+  BROKEN_SWP
+  NA // not applicable
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum ShipmentStatus {
+  PENDING
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  RETURNED
+  FAILED
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  CONVERTED
+  CLOSED
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+enum NutrientCategory {
+  MACRO
+  MINERAL
+  VITAMIN
+}
+
+enum NutritionSource {
+  LAB_TESTED
+  SUPPLIER
+  REFERENCE // authoritative public reference, e.g. USDA FoodData Central
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+  MODEL_3D
+}
+
+// ───────────────────────── Users ─────────────────────────
+
+/// Application profile linked 1:1 to a Supabase auth user. `role` provides
+/// role-based access control (CUSTOMER / ADMIN).
+model Profile {
+  id        String   @id @db.Uuid // equals auth.users.id
+  email     String   @unique
+  fullName  String?
+  phone     String?
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  addresses Address[]
+  cart      Cart?
+  orders    Order[]
+  reviews   Review[]
+  wishlist  Wishlist?
+  enquiries BulkEnquiry[]
+
+  @@index([role])
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  profileId  String   @db.Uuid
+  label      String? // Home, Office…
+  fullName   String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  postalCode String // Indian PIN code
+  country    String   @default("IN")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+// ───────────────────────── Catalogue ─────────────────────────
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id                 String      @id @default(cuid())
+  name               String
+  slug               String      @unique
+  shortDescription   String?
+  description        String
+  categoryId         String
+  form               CashewForm
+  grade              CashewGrade @default(NA)
+  origin             String? // only fill when verified
+  ingredients        String?
+  allergenInfo       String?
+  storageInstruction String?
+  deliveryInfo       String?
+  specifications     Json? // free-form key/value specs
+  nutritionProfileId String?
+  isFeatured         Boolean     @default(false)
+  isActive           Boolean     @default(true)
+  popularity         Int         @default(0)
+  seoTitle           String?
+  seoDescription     String?
+  isDemo             Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  category         Category          @relation(fields: [categoryId], references: [id])
+  nutritionProfile NutritionProfile? @relation(fields: [nutritionProfileId], references: [id])
+  images           ProductImage[]
+  variants         ProductVariant[]
+  reviews          Review[]
+  wishlistItems    WishlistItem[]
+
+  @@index([categoryId])
+  @@index([isActive, isFeatured])
+  @@index([form, grade])
+  @@index([createdAt])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  alt       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+/// A purchasable pack size of a product.
+model ProductVariant {
+  id             String   @id @default(cuid())
+  productId      String
+  sku            String   @unique
+  label          String // "250 g", "1 kg"
+  weightGrams    Int
+  priceInPaise   Int
+  compareAtPaise Int? // original price for discounts
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory  Inventory?
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@unique([productId, weightGrams])
+  @@index([productId])
+}
+
+model Inventory {
+  id                String   @id @default(cuid())
+  variantId         String   @unique
+  quantity          Int      @default(0)
+  reserved          Int      @default(0)
+  lowStockThreshold Int      @default(10)
+  updatedAt         DateTime @updatedAt
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────────────── Nutrition ─────────────────────────
+
+model NutritionProfile {
+  id         String          @id @default(cuid())
+  name       String // "Raw cashew kernels"
+  slug       String          @unique
+  basisGrams Int             @default(100)
+  sourceType NutritionSource
+  sourceNote String // exact citation / lab report reference
+  isDemo     Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  values   NutritionalValue[]
+  products Product[]
+}
+
+model NutritionalValue {
+  id        String           @id @default(cuid())
+  profileId String
+  key       String // machine key, e.g. "protein", "magnesium"
+  label     String
+  category  NutrientCategory
+  amount    Decimal          @db.Decimal(10, 3) // per basisGrams
+  unit      String // g, mg, mcg, kcal
+  sortOrder Int              @default(0)
+
+  profile NutritionProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, key])
+}
+
+// ───────────────────────── Cart & wishlist ─────────────────────────
+
+model Cart {
+  id         String   @id @default(cuid())
+  profileId  String?  @unique @db.Uuid
+  guestToken String?  @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  profile Profile?   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  items   CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  variantId String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, variantId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  profileId String   @unique @db.Uuid
+  createdAt DateTime @default(now())
+
+  profile Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  items   WishlistItem[]
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  productId  String
+  createdAt  DateTime @default(now())
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+}
+
+// ───────────────────────── Orders & payments ─────────────────────────
+
+model Coupon {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  type          DiscountType
+  value         Int // percent (1-100) or paise
+  minOrderPaise Int          @default(0)
+  maxUses       Int?
+  usedCount     Int          @default(0)
+  startsAt      DateTime?
+  expiresAt     DateTime?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  orders Order[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  profileId     String?     @db.Uuid
+  status        OrderStatus @default(PENDING_PAYMENT)
+  email         String
+  customerName  String
+  phone         String
+  // Delivery address snapshot (does not change if the saved address is edited)
+  shipLine1     String
+  shipLine2     String?
+  shipCity      String
+  shipState     String
+  shipPostal    String
+  shipCountry   String      @default("IN")
+  notes         String?
+  couponId      String?
+  subtotalPaise Int
+  discountPaise Int         @default(0)
+  shippingPaise Int         @default(0)
+  totalPaise    Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  profile  Profile?    @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  coupon   Coupon?     @relation(fields: [couponId], references: [id])
+  items    OrderItem[]
+  payments Payment[]
+  shipment Shipment?
+
+  @@index([profileId, createdAt])
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model OrderItem {
+  id             String  @id @default(cuid())
+  orderId        String
+  variantId      String?
+  // Snapshots so history survives product edits/deletes
+  productName    String
+  variantLabel   String
+  sku            String
+  unitPricePaise Int
+  quantity       Int
+  lineTotalPaise Int
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String
+  provider          String        @default("razorpay")
+  providerOrderId   String?       @unique // Razorpay order_id
+  providerPaymentId String?       @unique // Razorpay payment_id (idempotency)
+  status            PaymentStatus @default(CREATED)
+  amountPaise       Int
+  refundedPaise     Int           @default(0)
+  method            String?
+  failureReason     String?
+  rawEvent          Json? // last verified webhook payload (no card data)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+/// Webhook events already processed – prevents duplicate handling.
+model WebhookEvent {
+  id          String   @id // provider event id
+  provider    String
+  type        String
+  processedAt DateTime @default(now())
+}
+
+model Shipment {
+  id             String         @id @default(cuid())
+  orderId        String         @unique
+  carrier        String? // Shiprocket, Delhivery, manual…
+  trackingNumber String?
+  trackingUrl    String?
+  status         ShipmentStatus @default(PENDING)
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([trackingNumber])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  profileId  String   @db.Uuid
+  rating     Int // 1-5 (validated in service layer)
+  title      String?
+  body       String
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, profileId])
+  @@index([productId, isApproved])
+}
+
+// ───────────────────────── B2B ─────────────────────────
+
+model BulkEnquiry {
+  id               String        @id @default(cuid())
+  reference        String        @unique // e.g. BLK-2026-000123
+  profileId        String?       @db.Uuid
+  status           EnquiryStatus @default(NEW)
+  fullName         String
+  companyName      String
+  email            String
+  phone            String
+  whatsapp         String?
+  location         String
+  variety          String
+  grade            String?
+  quantityKg       Int
+  packaging        String?
+  expectedDelivery DateTime?
+  requirements     String?
+  adminNotes       String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  profile    Profile?    @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  quotations Quotation[]
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model Quotation {
+  id              String          @id @default(cuid())
+  enquiryId       String
+  status          QuotationStatus @default(DRAFT)
+  pricePerKgPaise Int
+  quantityKg      Int
+  validUntil      DateTime?
+  terms           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  enquiry BulkEnquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  @@index([enquiryId])
+}
+
+// ───────────────────────── Marketing & content ─────────────────────────
+
+model NewsletterSubscription {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  consentGivenAt   DateTime  @default(now())
+  unsubscribeToken String    @unique @default(cuid())
+  unsubscribedAt   DateTime?
+  createdAt        DateTime  @default(now())
+}
+
+model ManufacturingStage {
+  id          String   @id @default(cuid())
+  step        Int      @unique // 1..13
+  title       String
+  summary     String
+  qualityNote String // why this stage matters for quality
+  startSecond Int? // offset into the main video
+  isDemo      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  media ManufacturingMedia[]
+}
+
+model ManufacturingMedia {
+  id             String    @id @default(cuid())
+  stageId        String?
+  kind           MediaKind
+  url            String
+  posterUrl      String?
+  captionsUrl    String? // WebVTT
+  caption        String?
+  isIllustrative Boolean   @default(true) // true unless it is the company's own footage
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  stage ManufacturingStage? @relation(fields: [stageId], references: [id], onDelete: SetNull)
+
+  @@index([stageId])
+}
+
+/// Admin-editable key/value site content (company info, contact info, banners…).
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrl  String?
+  linkUrl   String?
+  linkLabel String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
