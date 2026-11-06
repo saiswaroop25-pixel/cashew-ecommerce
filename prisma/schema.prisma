@@ -573,3 +573,20 @@ model Banner {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+/// Record of every admin change (who, what, when). Deliberately has no foreign key to Profile
+/// so the history survives even if an account is deleted.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?  @db.Uuid
+  actorEmail String
+  action     String // e.g. "product.update", "order.status"
+  entity     String // e.g. "Product", "Order"
+  entityId   String?
+  summary    String?
+  diff       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}

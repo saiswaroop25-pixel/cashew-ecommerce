@@ -118,3 +118,54 @@ export async function sendBulkEnquiryEmails(enquiryId: string) {
     console.warn(`[bulk enquiry ${e.reference}] ADMIN_NOTIFICATION_EMAIL is not set - nobody was notified`);
   }
 }
+
+/** Tells the customer their order has shipped, with carrier and tracking details. */
+export async function sendShippedEmail(orderId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { shipment: true } });
+  if (!order?.shipment) return;
+  const s = order.shipment;
+  const track = s.trackingUrl && /^https?:\/\//i.test(s.trackingUrl)
+    ? `<p><a href="${esc(s.trackingUrl)}">Track your shipment</a></p>`
+    : "";
+  await sendEmail({
+    to: order.email,
+    subject: `Your order ${order.orderNumber} has shipped`,
+    html: wrap(`<h2 style="color:#344b35">Good news, ${esc(order.customerName)}!</h2>
+      <p>Your order <strong>${esc(order.orderNumber)}</strong> is on its way.</p>
+      <p>Carrier: <strong>${esc(s.carrier ?? "-")}</strong><br>Tracking number: <strong>${esc(s.trackingNumber ?? "-")}</strong></p>${track}`),
+  });
+}
+
+/** Confirms a refund to the customer. */
+export async function sendRefundEmail(orderId: string, amountPaise: number) {
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return;
+  await sendEmail({
+    to: order.email,
+    subject: `Refund issued for order ${order.orderNumber}`,
+    html: wrap(`<h2 style="color:#344b35">Your refund is on its way</h2>
+      <p>We have refunded <strong>${formatINR(amountPaise)}</strong> for order <strong>${esc(order.orderNumber)}</strong> to your original payment method.</p>
+      <p>Banks usually take 5-7 working days to show it.</p>`),
+  });
+}
+
+/** Sends a quotation to the buyer. */
+export async function sendQuotationEmail(quotationId: string) {
+  const q = await prisma.quotation.findUnique({ where: { id: quotationId }, include: { enquiry: true } });
+  if (!q) return;
+  const total = q.pricePerKgPaise * q.quantityKg;
+  await sendEmail({
+    to: q.enquiry.email,
+    subject: `Quotation for your enquiry ${q.enquiry.reference}`,
+    html: wrap(`<h2 style="color:#344b35">Your quotation</h2>
+      <p>Dear ${esc(q.enquiry.fullName)}, thank you for your enquiry <strong>${esc(q.enquiry.reference)}</strong>.</p>
+      <table style="border-collapse:collapse;font-size:14px">
+        <tr><td style="padding:3px 12px 3px 0;color:#795438">Quantity</td><td>${q.quantityKg} kg</td></tr>
+        <tr><td style="padding:3px 12px 3px 0;color:#795438">Price per kg</td><td>${formatINR(q.pricePerKgPaise)}</td></tr>
+        <tr><td style="padding:3px 12px 3px 0;color:#795438"><strong>Total</strong></td><td><strong>${formatINR(total)}</strong></td></tr>
+        ${q.validUntil ? `<tr><td style="padding:3px 12px 3px 0;color:#795438">Valid until</td><td>${q.validUntil.toISOString().slice(0, 10)}</td></tr>` : ""}
+      </table>
+      ${q.terms ? `<p><strong>Terms</strong><br>${esc(q.terms).replace(/\n/g, "<br>")}</p>` : ""}
+      <p>Reply to this email or contact us to confirm your order.</p>`),
+  });
+}

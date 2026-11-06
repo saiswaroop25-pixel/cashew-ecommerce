@@ -19,7 +19,7 @@ export class PaymentError extends Error {}
 type Tx = Prisma.TransactionClient;
 
 /** Serialise concurrent work on one order (checkout confirm, webhook, expiry job). */
-async function lockOrder(tx: Tx, orderId: string) {
+export async function lockOrder(tx: Tx, orderId: string) {
   await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${orderId} FOR UPDATE`;
 }
 
