@@ -6,6 +6,9 @@ import { listAdminBanners } from "@/services/admin/content";
 
 export const metadata: Metadata = { title: "Banners" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AdminBannersPage() {
   await requireAdmin();
   const banners = await listAdminBanners();

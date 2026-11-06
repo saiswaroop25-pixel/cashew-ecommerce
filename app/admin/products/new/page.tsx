@@ -7,6 +7,9 @@ import { getProductFormOptions } from "@/services/admin/products";
 
 export const metadata: Metadata = { title: "New product" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function NewProductPage() {
   await requireAdmin();
   const options = await getProductFormOptions();

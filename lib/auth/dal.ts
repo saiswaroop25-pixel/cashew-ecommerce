@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,6 +10,9 @@ import { createClient } from "@/lib/supabase/server";
  * auth server (getUser), never trust the cookie contents alone.
  */
 export const getSessionUser = cache(async () => {
+  // Session checks read the clock (token expiry), so they must only run for a real request – never while a page
+  // shell is being prerendered or prefetched (Next would flag `Date.now()` there).
+  await connection();
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return null;

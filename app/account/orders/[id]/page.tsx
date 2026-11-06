@@ -8,6 +8,9 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Order details", robots: { index: false } };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AccountOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const [profile, { id }] = await Promise.all([requireUser(), params]);
   // profileId in the WHERE clause: you can only ever load your own orders.

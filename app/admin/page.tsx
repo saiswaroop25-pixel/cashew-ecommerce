@@ -8,6 +8,9 @@ import { getDashboardStats } from "@/services/admin/stats";
 
 export const metadata: Metadata = { title: "Overview" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AdminOverview() {
   await requireAdmin();
   const s = await getDashboardStats();

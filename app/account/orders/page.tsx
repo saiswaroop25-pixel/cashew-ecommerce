@@ -7,6 +7,9 @@ import { formatINR } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My orders", robots: { index: false } };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function OrdersPage() {
   const profile = await requireUser();
   const orders = await prisma.order.findMany({

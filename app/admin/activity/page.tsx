@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Activity log" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function ActivityPage() {
   await requireAdmin();
   const logs = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 150 });

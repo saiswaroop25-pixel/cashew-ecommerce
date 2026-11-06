@@ -6,6 +6,9 @@ import { getSavedSiteSettings } from "@/services/admin/content";
 
 export const metadata: Metadata = { title: "Company details" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AdminSettingsPage() {
   await requireAdmin();
   const saved = await getSavedSiteSettings();

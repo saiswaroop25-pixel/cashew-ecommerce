@@ -12,6 +12,8 @@ vi.mock("@/lib/supabase/server", () => ({
     auth: { getUser: async () => (state.user ? { data: { user: { ...state.user, user_metadata: {} } }, error: null } : { data: { user: null }, error: new Error("no session") }) },
   }),
 }));
+vi.mock("next/server", () => ({ connection: async () => {} })); // no request scope in unit tests
+
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     profile: {

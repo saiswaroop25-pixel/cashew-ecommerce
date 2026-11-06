@@ -6,6 +6,9 @@ import { listWishlistProducts } from "@/services/catalog";
 
 export const metadata: Metadata = { title: "My wishlist", robots: { index: false } };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function WishlistPage() {
   const profile = await requireUser();
   const products = await listWishlistProducts(profile.id);

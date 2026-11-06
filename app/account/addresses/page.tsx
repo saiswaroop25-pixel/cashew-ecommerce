@@ -7,6 +7,9 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "My addresses", robots: { index: false } };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AddressesPage() {
   const profile = await requireUser();
   const addresses = await prisma.address.findMany({

@@ -5,6 +5,9 @@ import { requireUser } from "@/lib/auth/dal";
 
 export const metadata: Metadata = { title: "My account", robots: { index: false } };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AccountPage({
   searchParams,
 }: {

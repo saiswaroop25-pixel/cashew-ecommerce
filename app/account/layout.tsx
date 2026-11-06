@@ -11,6 +11,9 @@ const tabs = [
   { href: "/account/enquiries", label: "Bulk enquiries" },
 ];
 
+// Private, login-only area (see app/admin/layout.tsx): not an instant-navigation target.
+export const instant = false;
+
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">

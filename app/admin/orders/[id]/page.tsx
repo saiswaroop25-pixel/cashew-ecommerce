@@ -12,6 +12,9 @@ import { getAdminOrder } from "@/services/admin/orders";
 
 export const metadata: Metadata = { title: "Order" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
   const { id } = await params;

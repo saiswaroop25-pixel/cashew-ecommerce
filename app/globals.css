@@ -62,8 +62,15 @@ h1, h2, h3, h4 {
   }
 }
 
-/* Gentle idle float for the static 3D fallback illustration */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+/* Hero photo: a very slow, subtle zoom */
+@keyframes hero-zoom {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.hero-zoom {
+  will-change: transform;
+  animation: hero-zoom 22s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-zoom { animation: none; will-change: auto; }
 }

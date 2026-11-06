@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Private, login-only area: every page reads the session and live data, so it is not meant to be an instant
+// (prefetched) navigation. This opts it out of Next's dev-time instant-navigation checks.
+export const instant = false;
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={<p className="p-10 text-brown">Loading…</p>}>

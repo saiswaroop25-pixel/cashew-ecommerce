@@ -7,6 +7,9 @@ import { getProcessFlow } from "@/services/manufacturing";
 
 export const metadata: Metadata = { title: "Home: process flow" };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AdminProcessFlowPage() {
   await requireAdmin();
   const steps = await getProcessFlow();

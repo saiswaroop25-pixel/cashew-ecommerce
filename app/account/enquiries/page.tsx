@@ -14,6 +14,9 @@ const STATUS_LABEL: Record<string, string> = {
   CLOSED: "Closed",
 };
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function EnquiriesPage() {
   const profile = await requireUser();
   // Matches enquiries sent while signed in. profileId in the WHERE keeps it to your own.

@@ -13,6 +13,9 @@ export const metadata: Metadata = { title: "Products" };
 type SP = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
+// Private, login-only page: allowed to block on the session and live data (opts out of Next's dev instant-navigation check).
+export const instant = false;
+
 export default async function AdminProducts({ searchParams }: { searchParams: SP }) {
   await requireAdmin();
   const sp = await searchParams;
