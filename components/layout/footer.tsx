@@ -17,6 +17,8 @@ export function Footer() {
         <FooterList title="Explore">
           <Link href="/">Home</Link>
           <Link href="/shop">Shop</Link>
+          <Link href="/nutrition">Nutrition</Link>
+          <Link href="/process">Our process</Link>
           <Link href="/bulk-orders">Bulk orders</Link>
         </FooterList>
 

@@ -7,6 +7,8 @@ import { useState } from "react";
 // Only routes that exist. New pages are added here as their phases ship.
 const links = [
   { href: "/shop", label: "Shop" },
+  { href: "/nutrition", label: "Nutrition" },
+  { href: "/process", label: "Our process" },
   { href: "/bulk-orders", label: "Bulk orders" },
 ];
 
@@ -19,8 +21,8 @@ export function Header({ siteName, authSlot, cartSlot }: { siteName: string; aut
           {siteName}
         </Link>
 
-        <div className="flex items-center gap-2 md:gap-8">
-          <nav aria-label="Main" className="hidden items-center gap-8 md:flex">
+        <div className="flex items-center gap-2 lg:gap-8">
+          <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
             {links.map((l) => (
               <Link key={l.href} href={l.href} className="text-sm text-chocolate hover:text-forest">
                 {l.label}
@@ -31,7 +33,7 @@ export function Header({ siteName, authSlot, cartSlot }: { siteName: string; aut
           {cartSlot}
           <button
             type="button"
-            className="rounded-full p-2 text-forest hover:bg-cashew/50 md:hidden"
+            className="rounded-full p-2 text-forest hover:bg-cashew/50 lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-nav"
@@ -43,7 +45,7 @@ export function Header({ siteName, authSlot, cartSlot }: { siteName: string; aut
       </div>
 
       {open && (
-        <nav id="mobile-nav" aria-label="Mobile" className="border-t border-cashew bg-cream px-4 py-4 md:hidden">
+        <nav id="mobile-nav" aria-label="Mobile" className="border-t border-cashew bg-cream px-4 py-4 lg:hidden">
           <ul className="space-y-1">
             {links.map((l) => (
               <li key={l.href}>

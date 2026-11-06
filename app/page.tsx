@@ -144,6 +144,9 @@ async function Process() {
           General description of cashew processing (demo text) – not a description of our own facility.
         </p>
       )}
+      <div className="mt-6">
+        <LinkButton href="/process" variant="outline">Explore the complete process</LinkButton>
+      </div>
     </>
   );
 }
@@ -167,9 +170,10 @@ async function Nutrition() {
       <p className="mt-4 text-xs text-brown">
         Per {n.basisGrams} g of raw cashews. Source ({n.sourceType.toLowerCase().replace("_", " ")}): {n.sourceNote}
       </p>
-      <Link href={`/products/${n.productSlug}`} className="mt-3 inline-block text-sm text-forest underline">
-        See full nutrition on a product page
-      </Link>
+      <div className="mt-4 flex flex-wrap gap-4 text-sm">
+        <Link href="/nutrition" className="text-forest underline">Explore the nutrition dashboard</Link>
+        <Link href={`/products/${n.productSlug}`} className="text-forest underline">See it on a product page</Link>
+      </div>
     </Section>
   );
 }
