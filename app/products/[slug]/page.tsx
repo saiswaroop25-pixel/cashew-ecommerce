@@ -8,7 +8,12 @@ import { ProductCard } from "@/components/shop/product-card";
 import { GRADE_LABELS, type GRADES } from "@/lib/validators/catalog";
 import { getSessionUser } from "@/lib/auth/dal";
 import { WishlistButton } from "@/components/shop/wishlist-button";
+import { JsonLdScript } from "@/components/seo/json-ld";
+import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/jsonld";
+import { site } from "@/lib/site";
 import { getProductBySlug, isProductWishlisted, listRelatedProducts } from "@/services/catalog";
+import { listIndexableProducts, productSlugExists } from "@/services/seo";
+import { getSite } from "@/services/site";
 
 type Params = Promise<{ slug: string }>;
 
@@ -20,10 +25,30 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: product.seoTitle ?? product.name,
     description: product.seoDescription ?? product.shortDescription ?? undefined,
     alternates: { canonical: `/products/${product.slug}` },
+    // Link previews (WhatsApp, Facebook, X) use the product's main photo when it has one
+    openGraph: {
+      title: product.seoTitle ?? product.name,
+      description: product.seoDescription ?? product.shortDescription ?? undefined,
+      url: `/products/${product.slug}`,
+      ...(product.images[0] ? { images: [{ url: product.images[0].url, alt: product.images[0].alt }] } : {}),
+    },
   };
 }
 
-export default function ProductPage({ params }: { params: Params }) {
+/** Known slugs are prerendered; unknown ones are rendered on demand (and 404 below). */
+export async function generateStaticParams() {
+  const products = await listIndexableProducts();
+  return products.length ? products.map((p) => ({ slug: p.slug })) : [{ slug: "_" }];
+}
+
+// Deliberately a blocking route: the product is looked up before anything streams so an unknown slug gets a real
+// HTTP 404 (search engines treat a 200 "not found" page as a soft 404). Known products are still prerendered.
+export const instant = false;
+
+export default async function ProductPage({ params }: { params: Params }) {
+  // Checked before anything streams, so an unknown product is a real 404 (not a 200 page saying "not found").
+  const { slug } = await params;
+  if (!(await productSlugExists(slug))) notFound();
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
       <Suspense fallback={<p className="text-brown">Loading product…</p>}>
@@ -40,10 +65,30 @@ async function ProductDetail({ params }: { params: Params }) {
   const [related, user] = await Promise.all([listRelatedProducts(product.id, product.category.slug), getSessionUser()]);
   const wishlisted = user ? await isProductWishlisted(user.id, product.id) : false;
   const grade = GRADE_LABELS[product.grade as (typeof GRADES)[number] | "NA"];
+  const company = await getSite();
+  const productUrl = `${site.url}/products/${product.slug}`;
   const specs = (product.specifications ?? {}) as Record<string, string>;
 
   return (
     <>
+      <JsonLdScript
+        data={[
+          productJsonLd({
+            name: product.name,
+            description: product.shortDescription ?? product.description,
+            url: productUrl,
+            images: product.images.map((i) => i.url),
+            brand: company.name,
+            category: product.category.name,
+            variants: product.variants.map((v) => ({ sku: v.sku, pricePaise: v.priceInPaise, inStock: v.inStock })),
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", url: site.url },
+            { name: "Shop", url: `${site.url}/shop` },
+            { name: product.name, url: productUrl },
+          ]),
+        ]}
+      />
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-brown">
         <Link href="/shop" className="underline">Shop</Link> / {product.category.name}
       </nav>

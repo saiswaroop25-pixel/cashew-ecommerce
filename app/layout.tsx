@@ -5,6 +5,8 @@ import { AuthNav } from "@/components/layout/auth-nav";
 import { CartLink } from "@/components/layout/cart-link";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { JsonLdScript } from "@/components/seo/json-ld";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 import { site } from "@/lib/site";
 import { getSite } from "@/services/site";
 import "./globals.css";
@@ -27,6 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(site.url),
     title: { default: name, template: `%s | ${name}` },
     description: "Premium cashews for households and bulk buyers.",
+    // Defaults for link previews; pages can override. The preview image comes from app/opengraph-image.tsx.
+    openGraph: { type: "website", siteName: name, locale: "en_IN" },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -35,10 +40,25 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { name } = await getSite();
+  const company = await getSite();
+  const { name } = company;
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable} h-full`}>
+    <html lang="en-IN" className={`${heading.variable} ${body.variable} h-full`}>
       <body className="min-h-full flex flex-col">
+        <JsonLdScript
+          data={[
+            organizationJsonLd({
+              name,
+              url: site.url,
+              email: company.email,
+              phone: company.phone,
+              address: company.address,
+              social: [company.instagramUrl, company.facebookUrl, company.youtubeUrl],
+              description: company.about,
+            }),
+            websiteJsonLd(name, site.url),
+          ]}
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-forest focus:px-4 focus:py-2 focus:text-cream"
