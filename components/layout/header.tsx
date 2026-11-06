@@ -7,7 +7,7 @@ import { useState } from "react";
 // Only routes that exist. New pages are added here as their phases ship.
 const links = [{ href: "/shop", label: "Shop" }];
 
-export function Header({ siteName }: { siteName: string }) {
+export function Header({ siteName, authSlot }: { siteName: string; authSlot?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-cashew bg-cream/90 backdrop-blur">
@@ -22,6 +22,7 @@ export function Header({ siteName }: { siteName: string }) {
               {l.label}
             </Link>
           ))}
+          {authSlot}
         </nav>
 
         <button
@@ -50,6 +51,7 @@ export function Header({ siteName }: { siteName: string }) {
                 </Link>
               </li>
             ))}
+            <li className="px-3 py-3" onClick={() => setOpen(false)}>{authSlot}</li>
           </ul>
         </nav>
       )}

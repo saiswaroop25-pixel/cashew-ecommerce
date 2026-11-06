@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import { Suspense } from "react";
+import { AuthNav } from "@/components/layout/auth-nav";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { site } from "@/lib/site";
@@ -37,7 +39,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <Header siteName={site.name} />
+        <Header
+          siteName={site.name}
+          authSlot={
+            <Suspense fallback={<span className="inline-block h-4 w-14" aria-hidden />}>
+              <AuthNav />
+            </Suspense>
+          }
+        />
         <div id="main" className="flex flex-1 flex-col">{children}</div>
         <Footer />
       </body>
