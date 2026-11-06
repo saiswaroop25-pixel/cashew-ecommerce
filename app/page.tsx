@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { NewsletterForm } from "@/components/home/newsletter-form";
+import { Scene3D } from "@/components/three/scene-3d";
 import { ProductCard } from "@/components/shop/product-card";
 import { LinkButton, buttonVariants } from "@/components/ui/button";
 import { site } from "@/lib/site";
@@ -38,10 +39,10 @@ export default function Home() {
 function Hero() {
   return (
     <section className="relative overflow-hidden bg-cream">
-      {/* Decorative shapes only; the 3D cashew scene replaces this in the 3D phase. */}
+      {/* Soft decorative shapes behind the 3D scene */}
       <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-[28rem] w-[28rem] rounded-full bg-cashew/70" />
       <div aria-hidden className="pointer-events-none absolute right-24 top-40 h-56 w-56 rounded-full bg-gold/30" />
-      <div className={cn(container, "relative grid items-center gap-10 py-20 md:grid-cols-2 md:py-32")}>
+      <div className={cn(container, "relative grid items-center gap-6 py-14 md:grid-cols-2 md:py-24")}>
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-gold">Premium cashews</p>
           <h1 className="mt-4 font-serif text-5xl leading-[1.1] text-forest md:text-6xl">
@@ -55,6 +56,8 @@ function Hero() {
             <LinkButton href="/bulk-orders" variant="outline" size="lg">Explore bulk orders</LinkButton>
           </div>
         </div>
+        {/* Decorative 3D scene; the static illustration shows first and for reduced-motion / low-power visitors */}
+        <Scene3D variant="hero" className="aspect-[4/3] w-full md:aspect-square" />
       </div>
     </section>
   );
