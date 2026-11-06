@@ -11,10 +11,8 @@ import {
   addStageImage,
   createUploadTicket,
   moveProductImage,
-  removeMainVideo,
   removeProductImage,
   removeStageMedia,
-  setMainVideo,
   updateProductImageAlt,
   updateStage,
 } from "@/services/admin/media";
@@ -42,8 +40,7 @@ const refreshProduct = (id: string) => {
   revalidatePath("/");
 };
 const refreshProcess = () => {
-  revalidatePath("/admin/process");
-  revalidatePath("/process");
+  revalidatePath("/admin/process-flow");
   revalidatePath("/");
 };
 
@@ -109,32 +106,7 @@ export async function updateProductImageAltAction(_prev: FormState, fd: FormData
   return result;
 }
 
-/* ───────────────────────── Manufacturing process ───────────────────────── */
-
-export async function setMainVideoAction(_prev: FormState, fd: FormData): Promise<FormState> {
-  const admin = await requireAdmin();
-  const optional = z.string().max(120).optional().transform((v) => v || null);
-  const parsed = z
-    .object({
-      videoPath: pathSchema,
-      posterPath: optional,
-      captionsPath: optional,
-      caption: z.string().trim().max(200).optional().transform((v) => v || null),
-      isIllustrative: z.preprocess((v) => v === "on", z.boolean()),
-    })
-    .safeParse(Object.fromEntries(fd));
-  if (!parsed.success) return { ok: false, errors: deepErrors(parsed.error), message: "Upload a video first." };
-  const result = await run(async () => void (await setMainVideo(parsed.data, { id: admin.id, email: admin.email })), "Process video saved.");
-  refreshProcess();
-  return result;
-}
-
-export async function removeMainVideoAction(): Promise<FormState> {
-  const admin = await requireAdmin();
-  const result = await run(() => removeMainVideo({ id: admin.id, email: admin.email }), "Process video removed.");
-  refreshProcess();
-  return result;
-}
+/* ───────────────────────── Homepage process flow ───────────────────────── */
 
 export async function saveStageAction(_prev: FormState, fd: FormData): Promise<FormState> {
   const admin = await requireAdmin();
@@ -142,14 +114,7 @@ export async function saveStageAction(_prev: FormState, fd: FormData): Promise<F
     .object({
       id: idSchema,
       title: z.string().trim().min(2, "Enter a title").max(80),
-      summary: z.string().trim().min(5, "Describe this step").max(400),
-      qualityNote: z.string().trim().min(5, "Explain why it matters").max(400),
-      startSecond: z
-        .string()
-        .trim()
-        .optional()
-        .transform((v) => (v ? Number(v) : null))
-        .refine((v) => v === null || (Number.isInteger(v) && v >= 0 && v <= 36000), "Enter whole seconds (0 or more)"),
+      summary: z.string().trim().min(5, "Describe this step in a sentence").max(300, "Keep it under 300 characters"),
     })
     .safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: deepErrors(parsed.error) };

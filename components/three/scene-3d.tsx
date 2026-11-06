@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 // requested only when a capable device mounts a scene - never on the server, never for fallback users.
 const SCENES = {
   hero: dynamic(() => import("@/components/three/hero-scene"), { ssr: false }),
-  fruit: dynamic(() => import("@/components/three/fruit-scene"), { ssr: false }),
 };
 
 class SceneBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {

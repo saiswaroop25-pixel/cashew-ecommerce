@@ -132,7 +132,6 @@ export async function getProductBySlug(slug: string) {
         orderBy: { weightGrams: "asc" },
         include: { inventory: true },
       },
-      nutritionProfile: { include: { values: { orderBy: { sortOrder: "asc" } } } },
     },
   });
   if (!product) return null;

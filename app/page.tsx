@@ -1,20 +1,25 @@
-import Link from "next/link";
 import { Suspense } from "react";
+import { BannerStrip } from "@/components/home/banner-strip";
 import { NewsletterForm } from "@/components/home/newsletter-form";
+import { ProcessFlow } from "@/components/home/process-flow";
 import { Scene3D } from "@/components/three/scene-3d";
 import { ProductCard } from "@/components/shop/product-card";
 import { LinkButton, buttonVariants } from "@/components/ui/button";
-import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { bulkEnquiryWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
 import { listFeaturedProducts } from "@/services/catalog";
-import { getManufacturingStages, getNutritionHighlights } from "@/services/home";
+import { getActiveBanners } from "@/services/banners";
+import { getProcessFlow } from "@/services/manufacturing";
+import { getSite } from "@/services/site";
 
 const container = "mx-auto w-full max-w-7xl px-4 sm:px-6";
 
 export default function Home() {
   return (
     <main>
+      <Suspense fallback={null}>
+        <Banners />
+      </Suspense>
       <Hero />
       <Section title="Featured cashews" eyebrow="Popular choices">
         <Suspense fallback={<Skeleton />}>
@@ -22,18 +27,27 @@ export default function Home() {
         </Suspense>
       </Section>
       <WhyChooseUs />
-      <Section title="From fruit to finished pack" eyebrow="Our process">
-        <Suspense fallback={<Skeleton />}>
-          <Process />
-        </Suspense>
-      </Section>
+      <section id="process" className="scroll-mt-20 bg-white py-16">
+        <div className={container}>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold">Our process</p>
+          <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">From fruit to finished pack</h2>
+          <div className="mt-8">
+            <Suspense fallback={<Skeleton />}>
+              <Process />
+            </Suspense>
+          </div>
+        </div>
+      </section>
       <Suspense fallback={null}>
-        <Nutrition />
+        <BulkOrders />
       </Suspense>
-      <BulkOrders />
       <Newsletter />
     </main>
   );
+}
+
+async function Banners() {
+  return <BannerStrip banners={await getActiveBanners()} />;
 }
 
 function Hero() {
@@ -129,60 +143,24 @@ function WhyChooseUs() {
 }
 
 async function Process() {
-  const stages = await getManufacturingStages();
-  if (stages.length === 0) return null;
+  const steps = await getProcessFlow();
+  if (steps.length === 0) return null;
   return (
     <>
-      <ol className="flex snap-x gap-4 overflow-x-auto pb-4">
-        {stages.map((s) => (
-          <li key={s.step} className="w-56 shrink-0 snap-start rounded-card bg-white p-5 shadow-soft">
-            <span className="font-serif text-2xl text-gold">{String(s.step).padStart(2, "0")}</span>
-            <h3 className="mt-2 font-serif text-lg leading-snug text-chocolate">{s.title}</h3>
-            <p className="mt-2 text-sm text-brown">{s.summary}</p>
-          </li>
-        ))}
-      </ol>
-      {stages.some((s) => s.isDemo) && (
+      <p className="mb-4 max-w-2xl text-brown">Follow the journey from the tree to the sealed pack, step by step.</p>
+      <ProcessFlow steps={steps} />
+      {steps.some((s) => s.isDemo) && (
         <p className="mt-2 text-xs text-brown/70">
-          General description of cashew processing (demo text) – not a description of our own facility.
+          General description of how cashews are processed (placeholder wording) – not a description of our own facility.
         </p>
       )}
-      <div className="mt-6">
-        <LinkButton href="/process" variant="outline">Explore the complete process</LinkButton>
-      </div>
     </>
   );
 }
 
-async function Nutrition() {
-  const n = await getNutritionHighlights();
-  if (!n) return null;
-  return (
-    <Section title="Nutritional highlights" eyebrow="Good to know" className="pt-0">
-      <ul className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {n.values.map((v) => (
-          <li key={v.key} className="rounded-card bg-forest p-6 text-cream">
-            <p className="font-serif text-3xl">
-              {v.amount}
-              <span className="ml-1 text-base text-cream/70">{v.unit}</span>
-            </p>
-            <p className="mt-1 text-sm text-cream/80">{v.label}</p>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-4 text-xs text-brown">
-        Per {n.basisGrams} g of raw cashews. Source ({n.sourceType.toLowerCase().replace("_", " ")}): {n.sourceNote}
-      </p>
-      <div className="mt-4 flex flex-wrap gap-4 text-sm">
-        <Link href="/nutrition" className="text-forest underline">Explore the nutrition dashboard</Link>
-        <Link href={`/products/${n.productSlug}`} className="text-forest underline">See it on a product page</Link>
-      </div>
-    </Section>
-  );
-}
-
-function BulkOrders() {
-  const wa = whatsappLink(site.whatsappNumber, bulkEnquiryWhatsAppMessage());
+async function BulkOrders() {
+  const site = await getSite();
+  const wa = whatsappLink(site.whatsapp, bulkEnquiryWhatsAppMessage());
   return (
     <section id="bulk" className="scroll-mt-20 bg-cashew/50 py-16">
       <div className={cn(container, "grid items-center gap-8 md:grid-cols-2")}>

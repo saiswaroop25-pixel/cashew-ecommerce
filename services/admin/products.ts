@@ -61,11 +61,8 @@ export async function listAdminProducts(args: { q?: string; status?: "all" | "ac
 }
 
 export async function getProductFormOptions() {
-  const [categories, nutritionProfiles] = await Promise.all([
-    prisma.category.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true } }),
-    prisma.nutritionProfile.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
-  ]);
-  return { categories, nutritionProfiles };
+  const categories = await prisma.category.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true } });
+  return { categories };
 }
 
 export async function getAdminProduct(id: string) {
@@ -93,7 +90,6 @@ const productData = (p: ProductInput) => ({
   allergenInfo: p.allergenInfo,
   storageInstruction: p.storageInstruction,
   deliveryInfo: p.deliveryInfo,
-  nutritionProfileId: p.nutritionProfileId,
   isFeatured: p.isFeatured,
   isActive: p.isActive,
   seoTitle: p.seoTitle,

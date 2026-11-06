@@ -1,24 +1,31 @@
 import Link from "next/link";
-import { site } from "@/lib/site";
 import { legalPages } from "@/lib/legal";
+import { whatsappLink } from "@/lib/whatsapp";
+import { getSite } from "@/services/site";
 
-export function Footer() {
-  const wa = site.whatsappNumber ? `https://wa.me/${site.whatsappNumber}` : null;
+export async function Footer() {
+  const site = await getSite(); // company details from the admin settings (cached)
+  const wa = whatsappLink(site.whatsapp, "Hello!");
+  const social = [
+    { label: "Instagram", url: site.instagramUrl },
+    { label: "Facebook", url: site.facebookUrl },
+    { label: "YouTube", url: site.youtubeUrl },
+  ].filter((s) => s.url);
+  const hasContact = !!(site.email || site.phone || wa || site.address);
+
   return (
     <footer className="mt-24 bg-chocolate text-cream">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-1">
           <p className="font-serif text-xl">{site.name}</p>
-          <p className="mt-3 text-sm text-cream/70">
-            Company information to be added by the business.
-          </p>
+          {site.tagline && <p className="mt-1 text-sm text-gold">{site.tagline}</p>}
+          {site.about && <p className="mt-3 whitespace-pre-line text-sm text-cream/70">{site.about}</p>}
         </div>
 
         <FooterList title="Explore">
           <Link href="/">Home</Link>
           <Link href="/shop">Shop</Link>
-          <Link href="/nutrition">Nutrition</Link>
-          <Link href="/process">Our process</Link>
+          <Link href="/#process">Our process</Link>
           <Link href="/bulk-orders">Bulk orders</Link>
         </FooterList>
 
@@ -29,15 +36,17 @@ export function Footer() {
         </FooterList>
 
         <FooterList title="Contact">
-          {site.contactEmail ? (
-            <a href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>
-          ) : (
-            <span className="text-cream/60">Contact email not configured</span>
-          )}
-          {wa ? (
-            <a href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-          ) : (
-            <span className="text-cream/60">WhatsApp not configured</span>
+          {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+          {site.phone && <a href={`tel:${site.phone}`}>{site.phone}</a>}
+          {wa && <a href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
+          {site.address && <p className="whitespace-pre-line text-cream/70">{site.address}</p>}
+          {!hasContact && <Link href="/bulk-orders">Send us an enquiry</Link>}
+          {social.length > 0 && (
+            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {social.map((s) => (
+                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a>
+              ))}
+            </p>
           )}
         </FooterList>
       </div>

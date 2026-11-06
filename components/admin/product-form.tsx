@@ -37,7 +37,6 @@ export type ProductDefaults = {
   allergenInfo: string;
   storageInstruction: string;
   deliveryInfo: string;
-  nutritionProfileId: string;
   isFeatured: boolean;
   isActive: boolean;
   seoTitle: string;
@@ -47,7 +46,7 @@ export type ProductDefaults = {
 
 export const EMPTY_PRODUCT: ProductDefaults = {
   name: "", slug: "", categoryId: "", form: "", grade: "NA", shortDescription: "", description: "", origin: "", ingredients: "",
-  allergenInfo: "", storageInstruction: "", deliveryInfo: "", nutritionProfileId: "", isFeatured: false, isActive: true, seoTitle: "", seoDescription: "",
+  allergenInfo: "", storageInstruction: "", deliveryInfo: "", isFeatured: false, isActive: true, seoTitle: "", seoDescription: "",
   variants: [{ label: "250 g", weightGrams: "250", price: "", compareAt: "", sku: "", quantity: "0", lowStockThreshold: "10", isActive: true }],
 };
 
@@ -82,7 +81,7 @@ export function ProductForm({
   options,
 }: {
   defaults: ProductDefaults;
-  options: { categories: { id: string; name: string }[]; nutritionProfiles: { id: string; name: string }[] };
+  options: { categories: { id: string; name: string }[] };
 }) {
   const [s, action, pending] = useActionState(saveProductAction, initial);
   // Fully controlled: a failed save can never wipe what the admin typed.
@@ -173,10 +172,6 @@ export function ProductForm({
         <Area label="Full description" name="description" value={f.description} onChange={set("description")} rows={6} error={e.description} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Origin" name="origin" value={f.origin} onChange={(ev) => set("origin")(ev.target.value)} error={e.origin} hint="Only fill this in if you can verify it." />
-          <Select label="Nutrition profile" name="nutritionProfileId" value={f.nutritionProfileId} onChange={set("nutritionProfileId")} error={e.nutritionProfileId}>
-            <option value="">None</option>
-            {options.nutritionProfiles.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
-          </Select>
         </div>
         <Area label="Ingredients" name="ingredients" value={f.ingredients} onChange={set("ingredients")} rows={2} error={e.ingredients} />
         <Area label="Allergen information" name="allergenInfo" value={f.allergenInfo} onChange={set("allergenInfo")} rows={2} error={e.allergenInfo} hint="Cashews are tree nuts - say so, and mention any 'may contain' statements." />

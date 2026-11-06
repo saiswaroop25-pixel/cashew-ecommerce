@@ -1,10 +1,12 @@
 /**
  * Upload rules shared by the server (validation) and the browser (friendly pre-checks).
  * The *server* is the authority: these are checked again when an upload is requested and after it
- * lands, and the Supabase buckets enforce size + type limits independently.
+ * lands, and the Supabase bucket enforces size + type limits independently.
+ *
+ * Only images are uploaded (product photos, homepage process-flow pictures and banner images).
  */
-export type Bucket = "images" | "video" | "captions";
-export type UploadKind = "product-image" | "stage-image" | "process-poster" | "process-video" | "captions";
+export type Bucket = "images";
+export type UploadKind = "product-image" | "stage-image" | "banner-image";
 
 type Rule = { bucket: Bucket; mimes: Record<string, string>; maxBytes: number; label: string };
 
@@ -15,16 +17,12 @@ const MB = 1024 * 1024;
 export const UPLOAD_RULES: Record<UploadKind, Rule> = {
   "product-image": { bucket: "images", mimes: IMAGE_MIMES, maxBytes: 5 * MB, label: "JPEG, PNG, WebP or AVIF image up to 5 MB" },
   "stage-image": { bucket: "images", mimes: IMAGE_MIMES, maxBytes: 5 * MB, label: "JPEG, PNG, WebP or AVIF image up to 5 MB" },
-  "process-poster": { bucket: "images", mimes: IMAGE_MIMES, maxBytes: 5 * MB, label: "JPEG, PNG, WebP or AVIF image up to 5 MB" },
-  "process-video": { bucket: "video", mimes: { "video/mp4": "mp4", "video/webm": "webm" }, maxBytes: 50 * MB, label: "MP4 or WebM video up to 50 MB" },
-  captions: { bucket: "captions", mimes: { "text/vtt": "vtt" }, maxBytes: 1 * MB, label: "WebVTT (.vtt) captions file up to 1 MB" },
+  "banner-image": { bucket: "images", mimes: IMAGE_MIMES, maxBytes: 5 * MB, label: "JPEG, PNG, WebP or AVIF image up to 5 MB" },
 };
 
 /** Bucket-level limits, applied to Supabase Storage by scripts/setup-storage.ts. */
 export const BUCKETS: Record<Bucket, { public: boolean; fileSizeLimit: number; allowedMimeTypes: string[] }> = {
   images: { public: true, fileSizeLimit: 5 * MB, allowedMimeTypes: Object.keys(IMAGE_MIMES) },
-  video: { public: true, fileSizeLimit: 50 * MB, allowedMimeTypes: ["video/mp4", "video/webm"] },
-  captions: { public: true, fileSizeLimit: 1 * MB, allowedMimeTypes: ["text/vtt"] },
 };
 
 export type UploadCheck = { ok: true; bucket: Bucket; ext: string } | { ok: false; error: string };
@@ -46,7 +44,7 @@ export function objectPath(kind: UploadKind, uuid: string, ext: string): string 
 }
 
 /**
- * Identifies a file from its first bytes. Used to catch uploads whose declared type is a lie
+ * Identifies an image from its first bytes. Used to catch uploads whose declared type is a lie
  * (e.g. an HTML page uploaded with "image/png"). Returns null when nothing matches.
  */
 export function detectFileType(b: Uint8Array): string | null {
@@ -56,11 +54,7 @@ export function detectFileType(b: Uint8Array): string | null {
   if (at(0, 0xff, 0xd8, 0xff)) return "image/jpeg";
   if (at(0, 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return "image/png";
   if (ascii(0, "RIFF") && ascii(8, "WEBP")) return "image/webp";
-  if (ascii(4, "ftyp")) return ascii(8, "avif") || ascii(8, "avis") ? "image/avif" : "video/mp4";
-  if (at(0, 0x1a, 0x45, 0xdf, 0xa3)) return "video/webm";
-  // WebVTT may start with a UTF-8 BOM
-  const off = at(0, 0xef, 0xbb, 0xbf) ? 3 : 0;
-  if (ascii(off, "WEBVTT")) return "text/vtt";
+  if (ascii(4, "ftyp") && (ascii(8, "avif") || ascii(8, "avis"))) return "image/avif";
   return null;
 }
 

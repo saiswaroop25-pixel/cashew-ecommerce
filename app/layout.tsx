@@ -6,6 +6,7 @@ import { CartLink } from "@/components/layout/cart-link";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { site } from "@/lib/site";
+import { getSite } from "@/services/site";
 import "./globals.css";
 
 const heading = Playfair_Display({
@@ -20,17 +21,21 @@ const body = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: { default: site.name, template: `%s | ${site.name}` },
-  description: "Premium cashews for households and bulk buyers.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { name } = await getSite(); // company name from the admin settings (cached)
+  return {
+    metadataBase: new URL(site.url),
+    title: { default: name, template: `%s | ${name}` },
+    description: "Premium cashews for households and bulk buyers.",
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#F8F3E9",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const { name } = await getSite();
   return (
     <html lang="en" className={`${heading.variable} ${body.variable} h-full`}>
       <body className="min-h-full flex flex-col">
@@ -41,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <Header
-          siteName={site.name}
+          siteName={name}
           cartSlot={
             <Suspense fallback={<span className="inline-block h-9 w-9" aria-hidden />}>
               <CartLink />

@@ -1,7 +1,7 @@
 import "server-only";
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
-import { site } from "@/lib/site";
+import { getSite } from "@/services/site";
 import { formatINR } from "@/lib/utils";
 import { PACKAGING_OPTIONS, type PackagingKey } from "@/lib/validators/bulk";
 
@@ -37,11 +37,12 @@ export async function sendEmail(args: { to: string; subject: string; html: strin
   }
 }
 
-const wrap = (body: string) =>
-  `<div style="font-family:Arial,sans-serif;color:#38271f;max-width:560px">${body}<p style="color:#795438;font-size:12px;margin-top:24px">${esc(site.name)}</p></div>`;
+const wrap = (siteName: string, body: string) =>
+  `<div style="font-family:Arial,sans-serif;color:#38271f;max-width:560px">${body}<p style="color:#795438;font-size:12px;margin-top:24px">${esc(siteName)}</p></div>`;
 
 /** Customer payment confirmation, plus a heads-up to the business. */
 export async function sendOrderPaidEmails(orderId: string) {
+  const { name: siteName } = await getSite();
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
   if (!order) return;
 
@@ -62,7 +63,7 @@ export async function sendOrderPaidEmails(orderId: string) {
   await sendEmail({
     to: order.email,
     subject: `Payment received - order ${order.orderNumber}`,
-    html: wrap(`<h2 style="color:#344b35">Thank you, ${esc(order.customerName)}!</h2>
+    html: wrap(siteName, `<h2 style="color:#344b35">Thank you, ${esc(order.customerName)}!</h2>
       <p>We have received your payment for order <strong>${esc(order.orderNumber)}</strong>.</p>${summary}
       <p><strong>Delivering to</strong><br>${address}</p>
       <p>We will email you again when your order ships.</p>`),
@@ -73,7 +74,7 @@ export async function sendOrderPaidEmails(orderId: string) {
     await sendEmail({
       to: admin,
       subject: `New paid order ${order.orderNumber} - ${formatINR(order.totalPaise)}`,
-      html: wrap(
+      html: wrap(siteName, 
         `<h2>New paid order ${esc(order.orderNumber)}</h2>${summary}<p>${address}<br>${esc(order.phone)} / ${esc(order.email)}</p>${order.notes ? `<p>Notes: ${esc(order.notes)}</p>` : ""}`,
       ),
     });
@@ -82,6 +83,7 @@ export async function sendOrderPaidEmails(orderId: string) {
 
 /** Acknowledgement to the buyer + full details to the business. */
 export async function sendBulkEnquiryEmails(enquiryId: string) {
+  const { name: siteName } = await getSite();
   const e = await prisma.bulkEnquiry.findUnique({ where: { id: enquiryId } });
   if (!e) return;
 
@@ -100,7 +102,7 @@ export async function sendBulkEnquiryEmails(enquiryId: string) {
   await sendEmail({
     to: e.email,
     subject: `We received your enquiry ${e.reference}`,
-    html: wrap(`<h2 style="color:#344b35">Thank you, ${esc(e.fullName)}</h2>
+    html: wrap(siteName, `<h2 style="color:#344b35">Thank you, ${esc(e.fullName)}</h2>
       <p>We have received your bulk enquiry and will get back to you with a quotation.</p>${details}
       <p style="color:#795438;font-size:12px">Please quote your reference number in any follow-up.</p>`),
   });
@@ -110,7 +112,7 @@ export async function sendBulkEnquiryEmails(enquiryId: string) {
     await sendEmail({
       to: admin,
       subject: `New bulk enquiry ${e.reference} - ${e.quantityKg} kg from ${e.companyName}`,
-      html: wrap(`<h2>New bulk enquiry ${esc(e.reference)}</h2>
+      html: wrap(siteName, `<h2>New bulk enquiry ${esc(e.reference)}</h2>
         <p><strong>${esc(e.fullName)}</strong>, ${esc(e.companyName)}<br>
         ${esc(e.email)} / ${esc(e.phone)}${e.whatsapp ? ` / WhatsApp ${esc(e.whatsapp)}` : ""}</p>${details}`),
     });
@@ -121,6 +123,7 @@ export async function sendBulkEnquiryEmails(enquiryId: string) {
 
 /** Tells the customer their order has shipped, with carrier and tracking details. */
 export async function sendShippedEmail(orderId: string) {
+  const { name: siteName } = await getSite();
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { shipment: true } });
   if (!order?.shipment) return;
   const s = order.shipment;
@@ -130,7 +133,7 @@ export async function sendShippedEmail(orderId: string) {
   await sendEmail({
     to: order.email,
     subject: `Your order ${order.orderNumber} has shipped`,
-    html: wrap(`<h2 style="color:#344b35">Good news, ${esc(order.customerName)}!</h2>
+    html: wrap(siteName, `<h2 style="color:#344b35">Good news, ${esc(order.customerName)}!</h2>
       <p>Your order <strong>${esc(order.orderNumber)}</strong> is on its way.</p>
       <p>Carrier: <strong>${esc(s.carrier ?? "-")}</strong><br>Tracking number: <strong>${esc(s.trackingNumber ?? "-")}</strong></p>${track}`),
   });
@@ -138,12 +141,13 @@ export async function sendShippedEmail(orderId: string) {
 
 /** Confirms a refund to the customer. */
 export async function sendRefundEmail(orderId: string, amountPaise: number) {
+  const { name: siteName } = await getSite();
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) return;
   await sendEmail({
     to: order.email,
     subject: `Refund issued for order ${order.orderNumber}`,
-    html: wrap(`<h2 style="color:#344b35">Your refund is on its way</h2>
+    html: wrap(siteName, `<h2 style="color:#344b35">Your refund is on its way</h2>
       <p>We have refunded <strong>${formatINR(amountPaise)}</strong> for order <strong>${esc(order.orderNumber)}</strong> to your original payment method.</p>
       <p>Banks usually take 5-7 working days to show it.</p>`),
   });
@@ -151,13 +155,14 @@ export async function sendRefundEmail(orderId: string, amountPaise: number) {
 
 /** Sends a quotation to the buyer. */
 export async function sendQuotationEmail(quotationId: string) {
+  const { name: siteName } = await getSite();
   const q = await prisma.quotation.findUnique({ where: { id: quotationId }, include: { enquiry: true } });
   if (!q) return;
   const total = q.pricePerKgPaise * q.quantityKg;
   await sendEmail({
     to: q.enquiry.email,
     subject: `Quotation for your enquiry ${q.enquiry.reference}`,
-    html: wrap(`<h2 style="color:#344b35">Your quotation</h2>
+    html: wrap(siteName, `<h2 style="color:#344b35">Your quotation</h2>
       <p>Dear ${esc(q.enquiry.fullName)}, thank you for your enquiry <strong>${esc(q.enquiry.reference)}</strong>.</p>
       <table style="border-collapse:collapse;font-size:14px">
         <tr><td style="padding:3px 12px 3px 0;color:#795438">Quantity</td><td>${q.quantityKg} kg</td></tr>

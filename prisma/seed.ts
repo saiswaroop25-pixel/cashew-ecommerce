@@ -26,13 +26,12 @@ type P = {
   grade: CashewGrade;
   featured?: boolean;
   popularity: number;
-  raw?: boolean;
   pricePer250: number; // paise
 };
 const products: P[] = [
-  { slug: "demo-raw-whole-w180", name: "Raw Whole Cashews W180 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W180", featured: true, popularity: 90, raw: true, pricePer250: 32500 },
-  { slug: "demo-raw-whole-w240", name: "Raw Whole Cashews W240 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W240", featured: true, popularity: 80, raw: true, pricePer250: 29500 },
-  { slug: "demo-raw-whole-w320", name: "Raw Whole Cashews W320 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W320", popularity: 60, raw: true, pricePer250: 26500 },
+  { slug: "demo-raw-whole-w180", name: "Raw Whole Cashews W180 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W180", featured: true, popularity: 90, pricePer250: 32500 },
+  { slug: "demo-raw-whole-w240", name: "Raw Whole Cashews W240 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W240", featured: true, popularity: 80, pricePer250: 29500 },
+  { slug: "demo-raw-whole-w320", name: "Raw Whole Cashews W320 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W320", popularity: 60, pricePer250: 26500 },
   { slug: "demo-roasted-w240", name: "Roasted Cashews W240 (Demo)", cat: "roasted-salted", form: "ROASTED", grade: "W240", featured: true, popularity: 70, pricePer250: 31000 },
   { slug: "demo-salted-w320", name: "Salted Cashews W320 (Demo)", cat: "roasted-salted", form: "SALTED", grade: "W320", popularity: 50, pricePer250: 28000 },
   { slug: "demo-broken-bb", name: "Broken Cashews (Demo)", cat: "broken-cashews", form: "BROKEN", grade: "BROKEN_BB", popularity: 30, pricePer250: 18000 },
@@ -41,27 +40,6 @@ const packs = [
   { label: "250 g", grams: 250, mult: 1 },
   { label: "500 g", grams: 500, mult: 1.9 },
   { label: "1 kg", grams: 1000, mult: 3.6 },
-];
-
-// Reference values per 100 g, raw cashew nuts - USDA FoodData Central (SR Legacy).
-// Verify against the source (or replace with lab results) before publishing.
-const nutrients: [string, string, "MACRO" | "MINERAL" | "VITAMIN", number, string][] = [
-  ["energy", "Energy", "MACRO", 553, "kcal"],
-  ["protein", "Protein", "MACRO", 18.22, "g"],
-  ["fat", "Total fat", "MACRO", 43.85, "g"],
-  ["carbohydrate", "Carbohydrates", "MACRO", 30.19, "g"],
-  ["fibre", "Dietary fibre", "MACRO", 3.3, "g"],
-  ["sugar", "Sugars", "MACRO", 5.91, "g"],
-  ["magnesium", "Magnesium", "MINERAL", 292, "mg"],
-  ["phosphorus", "Phosphorus", "MINERAL", 593, "mg"],
-  ["copper", "Copper", "MINERAL", 2.195, "mg"],
-  ["manganese", "Manganese", "MINERAL", 1.655, "mg"],
-  ["zinc", "Zinc", "MINERAL", 5.78, "mg"],
-  ["iron", "Iron", "MINERAL", 6.68, "mg"],
-  ["potassium", "Potassium", "MINERAL", 660, "mg"],
-  ["vitamin_k", "Vitamin K", "VITAMIN", 34.1, "mcg"],
-  ["vitamin_b6", "Vitamin B6", "VITAMIN", 0.417, "mg"],
-  ["thiamin", "Thiamin (B1)", "VITAMIN", 0.423, "mg"],
 ];
 
 const stages: [string, string, string][] = [
@@ -88,22 +66,6 @@ async function main() {
     ).id;
   }
 
-  const profile = await prisma.nutritionProfile.upsert({
-    where: { slug: "raw-cashew-usda-reference" },
-    update: {},
-    create: {
-      name: "Raw cashew kernels (reference)",
-      slug: "raw-cashew-usda-reference",
-      sourceType: "REFERENCE",
-      sourceNote:
-        "USDA FoodData Central, SR Legacy - cashew nuts, raw. Generic reference, NOT lab-tested values for our product. Demo data: verify before publishing.",
-      isDemo: true,
-      values: {
-        create: nutrients.map(([key, label, category, amount, unit], i) => ({ key, label, category, amount, unit, sortOrder: i })),
-      },
-    },
-  });
-
   for (const p of products) {
     const product = await prisma.product.upsert({
       where: { slug: p.slug },
@@ -122,7 +84,6 @@ async function main() {
         isFeatured: !!p.featured,
         popularity: p.popularity,
         isDemo: true,
-        nutritionProfileId: p.raw ? profile.id : null,
       },
     });
     for (const pk of packs) {

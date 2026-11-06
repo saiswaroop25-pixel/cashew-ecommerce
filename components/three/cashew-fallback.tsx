@@ -17,23 +17,7 @@ const HERO_NUTS = [
   { x: 74, y: 76, s: 0.6, r: 14, d: 2.1 },
 ];
 
-export function CashewFallback({ variant, className }: { variant: "hero" | "fruit"; className?: string }) {
-  if (variant === "fruit") {
-    return (
-      <svg viewBox="0 0 200 200" className={cn("h-full w-full", className)} role="presentation">
-        <defs>
-          <linearGradient id="apple" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#E2B23C" />
-            <stop offset="1" stopColor="#C4452D" />
-          </linearGradient>
-        </defs>
-        <g className="motion-safe:animate-[float_7s_ease-in-out_infinite]">
-          <path d="M100 30 C150 30 160 90 150 125 C142 155 120 168 100 168 C80 168 58 155 50 125 C40 90 50 30 100 30 Z" fill="url(#apple)" />
-          <path d="M100 168 C112 170 124 182 112 196 C104 204 92 200 90 190 C88 180 94 170 100 168 Z" fill="#7D8A63" />
-        </g>
-      </svg>
-    );
-  }
+export function CashewFallback({ className }: { variant?: "hero"; className?: string }) {
   return (
     <svg viewBox="0 0 120 100" className={cn("h-full w-full", className)} role="presentation">
       <defs>

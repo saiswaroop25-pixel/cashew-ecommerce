@@ -87,26 +87,6 @@ async function ProductDetail({ params }: { params: Params }) {
         </div>
       </div>
 
-      {product.nutritionProfile && (
-        <section className="mt-14">
-          <h2 className="font-serif text-2xl text-forest">Nutrition per {product.nutritionProfile.basisGrams} g</h2>
-          <p className="mt-1 text-xs text-brown">
-            Source ({product.nutritionProfile.sourceType.toLowerCase().replace("_", " ")}):{" "}
-            {product.nutritionProfile.sourceNote}
-          </p>
-          <table className="mt-4 w-full max-w-md text-sm">
-            <tbody>
-              {product.nutritionProfile.values.map((n) => (
-                <tr key={n.id} className="border-b border-cashew">
-                  <th scope="row" className="py-2 text-left font-normal text-chocolate">{n.label}</th>
-                  <td className="py-2 text-right text-brown">{n.amount.toString()} {n.unit}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-
       {related.length > 0 && (
         <section className="mt-14">
           <h2 className="font-serif text-2xl text-forest">You may also like</h2>

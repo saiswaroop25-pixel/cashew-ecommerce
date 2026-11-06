@@ -37,7 +37,6 @@ export default async function EditProductPage({
     allergenInfo: product.allergenInfo ?? "",
     storageInstruction: product.storageInstruction ?? "",
     deliveryInfo: product.deliveryInfo ?? "",
-    nutritionProfileId: product.nutritionProfileId ?? "",
     isFeatured: product.isFeatured,
     isActive: product.isActive,
     seoTitle: product.seoTitle ?? "",

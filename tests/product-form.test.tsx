@@ -6,7 +6,7 @@ vi.mock("@/app/actions/admin/products", () => ({ saveProductAction: vi.fn(async 
 
 import { EMPTY_PRODUCT, ProductForm, type ProductDefaults } from "@/components/admin/product-form";
 
-const options = { categories: [{ id: "c1", name: "Whole Cashews" }], nutritionProfiles: [{ id: "n1", name: "Raw reference" }] };
+const options = { categories: [{ id: "c1", name: "Whole Cashews" }] };
 afterEach(cleanup);
 
 const submittedVariants = (container: HTMLElement) =>
@@ -61,9 +61,9 @@ describe("ProductForm pack-size editor", () => {
     expect(screen.getByRole("button", { name: "Save changes" })).toBeInTheDocument();
   });
 
-  it("every category and nutrition option from the database is offered", () => {
+  it("every category from the database is offered, and there is no nutrition field any more", () => {
     render(<ProductForm defaults={EMPTY_PRODUCT} options={options} />);
     expect(screen.getByRole("option", { name: "Whole Cashews" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Raw reference" })).toBeInTheDocument();
+    expect(screen.queryByText(/nutrition/i)).not.toBeInTheDocument();
   });
 });

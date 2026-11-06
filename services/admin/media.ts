@@ -7,7 +7,7 @@ import { AdminError } from "@/services/admin/products";
 import { logAudit, type Actor } from "@/services/admin/audit";
 
 const UPLOAD_KINDS = Object.keys(UPLOAD_RULES) as UploadKind[];
-const PATH_RE = /^(product-image|stage-image|process-poster|process-video|captions)\/[0-9a-f-]{36}\.[a-z0-9]{2,5}$/;
+const PATH_RE = /^(product-image|stage-image|banner-image)\/[0-9a-f-]{36}\.[a-z0-9]{2,5}$/;
 
 /** Which kind an object path belongs to (its folder), or null if it is not one of ours. */
 export function kindOfPath(path: string): UploadKind | null {
@@ -22,7 +22,7 @@ export type UploadTicket = { bucket: Bucket; path: string; token: string };
 /**
  * Step 1 of an upload: the server checks the request (kind, declared type, size), chooses the object
  * path itself, and returns a one-time signed upload token. The browser then sends the file straight to
- * storage; the file never passes through our server, so large videos work.
+ * storage; the file never passes through our server.
  */
 export async function createUploadTicket(kind: UploadKind, contentType: string, size: number): Promise<UploadTicket> {
   if (!UPLOAD_KINDS.includes(kind)) throw new AdminError("Unknown upload type.");
@@ -69,7 +69,7 @@ export async function verifyUploadedObject(path: string, expectedKind: UploadKin
     throw new AdminError(rule.error);
   }
 
-  // Look at the first bytes only (works for 50 MB videos without downloading them).
+  // Look at the first bytes only (no need to download the whole file).
   const { data: signed, error: signError } = await storage.createSignedUrl(path, 60);
   if (signError || !signed) throw new AdminError("Could not check the uploaded file. Please try again.");
   const res = await fetch(signed.signedUrl, { headers: { Range: "bytes=0-63" } });
@@ -92,11 +92,11 @@ export async function verifyUploadedObject(path: string, expectedKind: UploadKin
 export function pathFromPublicUrl(url: string): { bucket: Bucket; path: string } | null {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!base) return null;
-  const m = url.match(new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/storage/v1/object/public/(images|video|captions)/(.+)$`));
+  const m = url.match(new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/storage/v1/object/public/(images)/(.+)$`));
   return m && PATH_RE.test(m[2]) ? { bucket: m[1] as Bucket, path: m[2] } : null;
 }
 
-async function removeByUrl(url: string | null | undefined) {
+export async function removeByUrl(url: string | null | undefined) {
   const ref = url ? pathFromPublicUrl(url) : null;
   if (ref) await removeObject(ref.bucket, ref.path);
 }
@@ -143,37 +143,9 @@ export async function updateProductImageAlt(imageId: string, alt: string, actor:
   await logAudit(actor, { action: "product.image.alt", entity: "Product", entityId: image.productId, summary: "Updated a photo description" });
 }
 
-/* ───────────────────────── 4. Manufacturing process ───────────────────────── */
+/* ───────────────────────── 4. Homepage process flow ───────────────────────── */
 
-export type MainVideoInput = { videoPath: string; posterPath: string | null; captionsPath: string | null; caption: string | null; isIllustrative: boolean };
-
-/** Replaces the main process video (and its poster/captions), cleaning up the old files. */
-export async function setMainVideo(input: MainVideoInput, actor: Actor) {
-  const video = await verifyUploadedObject(input.videoPath, "process-video");
-  const poster = input.posterPath ? await verifyUploadedObject(input.posterPath, "process-poster") : null;
-  const captions = input.captionsPath ? await verifyUploadedObject(input.captionsPath, "captions") : null;
-
-  const old = await prisma.manufacturingMedia.findMany({ where: { stageId: null, kind: "VIDEO" } });
-  const created = await prisma.$transaction(async (tx) => {
-    await tx.manufacturingMedia.deleteMany({ where: { stageId: null, kind: "VIDEO" } });
-    return tx.manufacturingMedia.create({
-      data: { kind: "VIDEO", url: video.url, posterUrl: poster?.url ?? null, captionsUrl: captions?.url ?? null, caption: input.caption, isIllustrative: input.isIllustrative, sortOrder: 0 },
-    });
-  });
-  for (const o of old) await Promise.all([removeByUrl(o.url), removeByUrl(o.posterUrl), removeByUrl(o.captionsUrl)]);
-  await logAudit(actor, { action: "process.video.set", entity: "ManufacturingMedia", entityId: created.id, summary: `Set the main process video (${input.isIllustrative ? "illustrative" : "own footage"})` });
-  return created;
-}
-
-export async function removeMainVideo(actor: Actor) {
-  const old = await prisma.manufacturingMedia.findMany({ where: { stageId: null, kind: "VIDEO" } });
-  if (old.length === 0) return;
-  await prisma.manufacturingMedia.deleteMany({ where: { stageId: null, kind: "VIDEO" } });
-  for (const o of old) await Promise.all([removeByUrl(o.url), removeByUrl(o.posterUrl), removeByUrl(o.captionsUrl)]);
-  await logAudit(actor, { action: "process.video.remove", entity: "ManufacturingMedia", summary: "Removed the main process video" });
-}
-
-export type StageInput = { title: string; summary: string; qualityNote: string; startSecond: number | null };
+export type StageInput = { title: string; summary: string };
 
 /** Editing a stage means a person has now written it, so it stops being flagged as placeholder text. */
 export async function updateStage(stageId: string, input: StageInput, actor: Actor) {
@@ -200,6 +172,6 @@ export async function removeStageMedia(mediaId: string, actor: Actor) {
   const media = await prisma.manufacturingMedia.findUnique({ where: { id: mediaId } });
   if (!media?.stageId) throw new AdminError("Image not found.");
   await prisma.manufacturingMedia.delete({ where: { id: mediaId } });
-  await Promise.all([removeByUrl(media.url), removeByUrl(media.posterUrl), removeByUrl(media.captionsUrl)]);
+  await removeByUrl(media.url);
   await logAudit(actor, { action: "process.stage.image.remove", entity: "ManufacturingStage", entityId: media.stageId, summary: "Removed a stage image" });
 }

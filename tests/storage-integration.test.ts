@@ -19,10 +19,8 @@ import {
   createUploadTicket,
   moveProductImage,
   pathFromPublicUrl,
-  removeMainVideo,
   removeProductImage,
   removeStageMedia,
-  setMainVideo,
   updateStage,
   verifyUploadedObject,
 } from "@/services/admin/media";
@@ -33,8 +31,6 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
 
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
-const MP4 = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypisom"), Buffer.alloc(200)]);
-const VTT = Buffer.from("WEBVTT\n\n00:00.000 --> 00:02.000\nHello\n");
 const HTML = Buffer.from("<html><script>alert('xss')</script></html>");
 
 const uploaded: { bucket: Bucket; path: string }[] = [];
@@ -53,7 +49,7 @@ beforeAll(async () => {
   // sanity: the buckets exist
   const { data } = await getSupabaseAdmin().storage.listBuckets();
   const names = (data ?? []).map((b) => b.name);
-  for (const n of ["images", "video", "captions"]) expect(names).toContain(n);
+  expect(names).toContain("images");
 });
 
 afterAll(async () => {
@@ -68,7 +64,7 @@ describe("upload tickets (server-side checks before any byte is sent)", () => {
     await expect(createUploadTicket("product-image", "image/svg+xml", 100)).rejects.toThrow(AdminError);
     await expect(createUploadTicket("product-image", "text/html", 100)).rejects.toThrow(AdminError);
     await expect(createUploadTicket("product-image", "image/png", 6 * 1024 * 1024)).rejects.toThrow(/too large/);
-    await expect(createUploadTicket("process-video", "video/mp4", 60 * 1024 * 1024)).rejects.toThrow(/too large/);
+    await expect(createUploadTicket("stage-image", "video/mp4", 100)).rejects.toThrow(AdminError); // videos are not accepted any more
     await expect(createUploadTicket("product-image", "image/png", 0)).rejects.toThrow(AdminError);
     await expect(createUploadTicket("hack" as UploadKind, "image/png", 10)).rejects.toThrow(AdminError);
   });
@@ -125,10 +121,10 @@ describe("post-upload verification catches dishonest files", () => {
     expect(await exists(ticket.bucket, ticket.path)).toBe(false);
   });
 
-  it("a PNG uploaded as if it were a video is rejected and deleted", async () => {
-    const { ticket, error } = await upload("process-video", PNG, "video/mp4");
+  it("a PNG declared as a JPEG is rejected and deleted", async () => {
+    const { ticket, error } = await upload("product-image", PNG, "image/jpeg");
     expect(error).toBeNull();
-    await expect(verifyUploadedObject(ticket.path, "process-video")).rejects.toThrow(/actually image\/png|rejected/);
+    await expect(verifyUploadedObject(ticket.path, "product-image")).rejects.toThrow(/actually image\/png|rejected/);
     expect(await exists(ticket.bucket, ticket.path)).toBe(false);
   });
 
@@ -136,7 +132,7 @@ describe("post-upload verification catches dishonest files", () => {
     await expect(verifyUploadedObject("../../secret.png", "product-image")).rejects.toThrow(AdminError);
     await expect(verifyUploadedObject("product-image/not-a-uuid.png", "product-image")).rejects.toThrow(AdminError);
     const { ticket } = await upload("product-image", PNG, "image/png");
-    await expect(verifyUploadedObject(ticket.path, "process-poster")).rejects.toThrow(/does not belong/); // wrong kind for this folder
+    await expect(verifyUploadedObject(ticket.path, "stage-image")).rejects.toThrow(/does not belong/); // wrong kind for this folder
   });
 
   it("a missing object is reported cleanly", async () => {
@@ -188,46 +184,14 @@ describe("product photos", () => {
   });
 });
 
-describe("manufacturing media", () => {
-  it("main video with poster and captions: set, replace (old files deleted), remove", async () => {
-    // Safety: never overwrite a real video someone has uploaded.
-    if ((await prisma.manufacturingMedia.count({ where: { stageId: null, kind: "VIDEO" } })) > 0) return;
-
-    const v1 = await upload("process-video", MP4, "video/mp4");
-    const p1 = await upload("process-poster", PNG, "image/png");
-    const c1 = await upload("captions", VTT, "text/vtt");
-    const first = await setMainVideo({ videoPath: v1.ticket.path, posterPath: p1.ticket.path, captionsPath: c1.ticket.path, caption: "Test clip", isIllustrative: true }, actor);
-    expect(first.url).toContain(v1.ticket.path);
-    expect(first.captionsUrl).toContain(c1.ticket.path);
-    expect(first.isIllustrative).toBe(true);
-
-    const v2 = await upload("process-video", MP4, "video/mp4");
-    await setMainVideo({ videoPath: v2.ticket.path, posterPath: null, captionsPath: null, caption: null, isIllustrative: false }, actor);
-    expect(await prisma.manufacturingMedia.count({ where: { stageId: null, kind: "VIDEO" } })).toBe(1); // replaced, not duplicated
-    expect(await exists("video", v1.ticket.path)).toBe(false);
-    expect(await exists("images", p1.ticket.path)).toBe(false);
-    expect(await exists("captions", c1.ticket.path)).toBe(false);
-
-    await removeMainVideo(actor);
-    expect(await prisma.manufacturingMedia.count({ where: { stageId: null, kind: "VIDEO" } })).toBe(0);
-    expect(await exists("video", v2.ticket.path)).toBe(false);
-  });
-
-  it("a bad poster aborts the whole change and leaves any existing video untouched", async () => {
-    if ((await prisma.manufacturingMedia.count({ where: { stageId: null, kind: "VIDEO" } })) > 0) return;
-    const v = await upload("process-video", MP4, "video/mp4");
-    const badPoster = await upload("process-poster", HTML, "image/png");
-    await expect(setMainVideo({ videoPath: v.ticket.path, posterPath: badPoster.ticket.path, captionsPath: null, caption: null, isIllustrative: true }, actor)).rejects.toThrow(AdminError);
-    expect(await prisma.manufacturingMedia.count({ where: { stageId: null, kind: "VIDEO" } })).toBe(0);
-  });
-
+describe("homepage process flow", () => {
   it("stage text edits clear the placeholder flag; stage images replace each other; originals are restored", async () => {
     const stage = await prisma.manufacturingStage.findUniqueOrThrow({ where: { step: 13 } });
     if ((await prisma.manufacturingMedia.count({ where: { stageId: stage.id } })) > 0) return; // do not touch real images
     try {
-      await updateStage(stage.id, { title: `${TAG} title`, summary: "s", qualityNote: "q", startSecond: 5 }, actor);
+      await updateStage(stage.id, { title: `${TAG} title`, summary: "A short test description." }, actor);
       const edited = await prisma.manufacturingStage.findUniqueOrThrow({ where: { id: stage.id } });
-      expect(edited).toMatchObject({ title: `${TAG} title`, isDemo: false, startSecond: 5 });
+      expect(edited).toMatchObject({ title: `${TAG} title`, isDemo: false });
 
       const i1 = await upload("stage-image", PNG, "image/png");
       const i2 = await upload("stage-image", PNG, "image/png");
@@ -240,7 +204,7 @@ describe("manufacturing media", () => {
       await removeStageMedia(media[0].id, actor);
       expect(await prisma.manufacturingMedia.count({ where: { stageId: stage.id } })).toBe(0);
     } finally {
-      await prisma.manufacturingStage.update({ where: { id: stage.id }, data: { title: stage.title, summary: stage.summary, qualityNote: stage.qualityNote, startSecond: stage.startSecond, isDemo: stage.isDemo } });
+      await prisma.manufacturingStage.update({ where: { id: stage.id }, data: { title: stage.title, summary: stage.summary, isDemo: stage.isDemo } });
     }
     const restored = await prisma.manufacturingStage.findUniqueOrThrow({ where: { id: stage.id } });
     expect(restored.title).toBe(stage.title);

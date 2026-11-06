@@ -112,12 +112,13 @@ describe("admin pages render against real data", () => {
     expect(out).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
   });
 
-  it("process page admin shows the video editor and all 13 steps with upload controls", async () => {
-    const { default: Page } = await import("@/app/admin/process/page");
+  it("home process-flow admin shows every step with its picture upload", async () => {
+    const { default: Page } = await import("@/app/admin/process-flow/page");
     const out = await html(Page());
-    for (const text of ["Main process video", "The 13 steps", "Video file", "Poster image", "Captions", "Publish video", "Save step"]) expect(out).toContain(text);
+    for (const text of ["Home page: process flow", "The steps", "Add a picture", "Save step", "Photo"]) expect(out).toContain(text);
     expect((out.match(/Save step/g) ?? []).length).toBe(13);
-    expect(out).toContain("WebVTT"); // upload rules are shown to the admin
+    expect(out).toContain("JPEG, PNG, WebP or AVIF image up to 5 MB");
+    expect(out).not.toMatch(/video|captions/i); // those features are gone
   });
 
   it("product edit page now includes the photo manager", async () => {
@@ -126,6 +127,21 @@ describe("admin pages render against real data", () => {
     expect(out).toContain("Photos");
     expect(out).toContain("Add a photo");
     expect(out).toContain("JPEG, PNG, WebP or AVIF image up to 5 MB");
+  });
+
+  it("company details form, banner manager and customers list render", async () => {
+    const settings = await import("@/app/admin/settings/page");
+    const out1 = await html(settings.default());
+    for (const text of ["Business name", "WhatsApp number", "Instagram", "Save details"]) expect(out1).toContain(text);
+
+    const banners = await import("@/app/admin/banners/page");
+    const out2 = await html(banners.default());
+    for (const text of ["Home page banners", "New banner", "Create banner"]) expect(out2).toContain(text);
+
+    const customers = await import("@/app/admin/customers/page");
+    const out3 = await html(customers.default({ searchParams: sp() }));
+    for (const text of ["Customers", "Paid orders", "Spent"]) expect(out3).toContain(text);
+    expect(await html(customers.default({ searchParams: sp({ q: "no-such-person-xyz" }) }))).toContain("No customers match");
   });
 
   it("activity log renders", async () => {

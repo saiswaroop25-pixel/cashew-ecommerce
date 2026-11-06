@@ -7,8 +7,7 @@ import { useState } from "react";
 // Only routes that exist. New pages are added here as their phases ship.
 const links = [
   { href: "/shop", label: "Shop" },
-  { href: "/nutrition", label: "Nutrition" },
-  { href: "/process", label: "Our process" },
+  { href: "/#process", label: "Our process" },
   { href: "/bulk-orders", label: "Bulk orders" },
 ];
 

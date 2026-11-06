@@ -10,8 +10,7 @@ const PNG = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 describe("validateUploadRequest", () => {
   it("accepts allowed type + size and picks the bucket and extension itself", () => {
     expect(validateUploadRequest("product-image", "image/png", 1000)).toEqual({ ok: true, bucket: "images", ext: "png" });
-    expect(validateUploadRequest("process-video", "video/mp4", 20 * 1024 * 1024)).toEqual({ ok: true, bucket: "video", ext: "mp4" });
-    expect(validateUploadRequest("captions", "text/vtt", 500)).toEqual({ ok: true, bucket: "captions", ext: "vtt" });
+    expect(validateUploadRequest("stage-image", "image/webp", 2000)).toEqual({ ok: true, bucket: "images", ext: "webp" });
   });
   it.each(["image/svg+xml", "text/html", "application/pdf", "image/gif", "application/x-msdownload", "", "image/png; charset=evil"])("rejects type %j for images", (t) => {
     expect(validateUploadRequest("product-image", t, 1000).ok).toBe(false);
@@ -22,13 +21,12 @@ describe("validateUploadRequest", () => {
   it("enforces size limits per kind", () => {
     expect(validateUploadRequest("product-image", "image/png", UPLOAD_RULES["product-image"].maxBytes).ok).toBe(true);
     expect(validateUploadRequest("product-image", "image/png", UPLOAD_RULES["product-image"].maxBytes + 1).ok).toBe(false);
-    expect(validateUploadRequest("captions", "text/vtt", 2 * 1024 * 1024).ok).toBe(false);
     for (const bad of [0, -5, NaN, Infinity]) expect(validateUploadRequest("product-image", "image/png", bad).ok).toBe(false);
   });
-  it("does not let one kind use another kind's types (no video in the image slot, no image as captions)", () => {
-    expect(validateUploadRequest("product-image", "video/mp4", 1000).ok).toBe(false);
-    expect(validateUploadRequest("process-video", "image/png", 1000).ok).toBe(false);
-    expect(validateUploadRequest("captions", "image/png", 1000).ok).toBe(false);
+  it("accepts images only: videos, captions and documents are refused for every kind", () => {
+    for (const kind of ["product-image", "stage-image"] as const) {
+      for (const t of ["video/mp4", "video/webm", "text/vtt", "application/pdf"]) expect(validateUploadRequest(kind, t, 1000).ok).toBe(false);
+    }
   });
   it("rejects an unknown kind", () => {
     expect(validateUploadRequest("hack" as never, "image/png", 10).ok).toBe(false);
@@ -54,11 +52,11 @@ describe("detectFileType (magic bytes)", () => {
     expect(detectFileType(pad(PNG))).toBe("image/png");
     expect(detectFileType(pad([...code("RIFF"), 0, 0, 0, 0, ...code("WEBP")]))).toBe("image/webp");
     expect(detectFileType(ftyp("avif"))).toBe("image/avif");
-    expect(detectFileType(ftyp("isom"))).toBe("video/mp4");
-    expect(detectFileType(ftyp("mp42"))).toBe("video/mp4");
-    expect(detectFileType(pad([0x1a, 0x45, 0xdf, 0xa3]))).toBe("video/webm");
-    expect(detectFileType(text("WEBVTT\n\n00:00.000 --> 00:01.000\nHi"))).toBe("text/vtt");
-    expect(detectFileType(Uint8Array.from([0xef, 0xbb, 0xbf, ...text("WEBVTT")]))).toBe("text/vtt");
+  });
+  it("no longer recognises video or captions (they are not accepted any more)", () => {
+    expect(detectFileType(ftyp("isom"))).toBeNull();
+    expect(detectFileType(pad([0x1a, 0x45, 0xdf, 0xa3]))).toBeNull();
+    expect(detectFileType(text("WEBVTT\n\n00:00.000 --> 00:01.000\nHi"))).toBeNull();
   });
   it("returns null for scripts, HTML, SVG, executables and empty input", () => {
     for (const s of ["<html><script>alert(1)</script></html>", "<svg onload=alert(1)>", "#!/bin/sh\nrm -rf /", "MZ\u0090\u0000", "just text"]) {
@@ -66,9 +64,9 @@ describe("detectFileType (magic bytes)", () => {
     }
     expect(detectFileType(new Uint8Array(0))).toBeNull();
   });
-  it("catches a lie: HTML uploaded as image/png, or a PNG uploaded as a video", () => {
+  it("catches a lie: HTML uploaded as image/png, or a PNG declared as a JPEG", () => {
     expect(declaredMatchesContent("image/png", text("<html>evil</html>"))).toBe(false);
-    expect(declaredMatchesContent("video/mp4", pad(PNG))).toBe(false);
+    expect(declaredMatchesContent("image/jpeg", pad(PNG))).toBe(false);
     expect(declaredMatchesContent("image/png", pad(PNG))).toBe(true);
   });
 });

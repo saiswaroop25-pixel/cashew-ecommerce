@@ -26,13 +26,14 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn(() => { throw new Error("NOT_FOUND"); }),
 }));
 
+import * as contentActions from "@/app/actions/admin/content";
 import * as enquiryActions from "@/app/actions/admin/enquiries";
 import * as mediaActions from "@/app/actions/admin/media";
 import * as orderActions from "@/app/actions/admin/orders";
 import * as productActions from "@/app/actions/admin/products";
 import { requireAdmin } from "@/lib/auth/dal";
 
-const modules = { products: productActions, orders: orderActions, enquiries: enquiryActions, media: mediaActions };
+const modules = { products: productActions, orders: orderActions, enquiries: enquiryActions, media: mediaActions, content: contentActions };
 
 function fakeForm() {
   const fd = new FormData();
@@ -64,6 +65,6 @@ describe("admin server actions refuse non-admins", () => {
 
   it("covers a sensible number of actions in total", () => {
     const total = Object.values(modules).flatMap((m) => Object.values(m).filter((v) => typeof v === "function")).length;
-    expect(total).toBeGreaterThanOrEqual(22);
+    expect(total).toBeGreaterThanOrEqual(27);
   });
 });

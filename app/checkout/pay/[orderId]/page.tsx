@@ -5,8 +5,8 @@ import { PayButton } from "@/components/checkout/pay-button";
 import { OrderDetails, STATUS_LABEL } from "@/components/orders/order-details";
 import { LinkButton } from "@/components/ui/button";
 import { getSessionUser } from "@/lib/auth/dal";
-import { site } from "@/lib/site";
 import { getOrderForViewer } from "@/services/orders";
+import { getSite } from "@/services/site";
 
 export const metadata: Metadata = {
   title: "Your order",
@@ -33,7 +33,7 @@ export default function PayPage(props: Props) {
 async function Body({ params, searchParams }: Props) {
   const [{ orderId }, sp, user] = await Promise.all([params, searchParams, getSessionUser()]);
   const token = typeof sp.t === "string" ? sp.t : null;
-  const order = await getOrderForViewer(orderId, token, user?.id ?? null);
+  const [order, site] = await Promise.all([getOrderForViewer(orderId, token, user?.id ?? null), getSite()]);
   if (!order) notFound();
 
   const paid = ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"].includes(order.status);

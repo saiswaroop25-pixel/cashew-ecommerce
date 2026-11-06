@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { BulkForm } from "@/components/bulk/bulk-form";
 import { buttonVariants } from "@/components/ui/button";
 import { getProfile } from "@/lib/auth/dal";
-import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { bulkEnquiryWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
+import { getSite } from "@/services/site";
 
 export const metadata: Metadata = {
   title: "Bulk orders & wholesale enquiries",
@@ -19,8 +19,9 @@ const steps = [
   { title: "Confirm and order", text: "Once you are happy with the terms, we agree the order together." },
 ];
 
-export default function BulkOrdersPage() {
-  const wa = whatsappLink(site.whatsappNumber, bulkEnquiryWhatsAppMessage());
+export default async function BulkOrdersPage() {
+  const site = await getSite();
+  const wa = whatsappLink(site.whatsapp, bulkEnquiryWhatsAppMessage());
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
       <p className="text-xs uppercase tracking-[0.3em] text-gold">Wholesale &amp; bulk</p>
@@ -56,8 +57,8 @@ export default function BulkOrdersPage() {
           ) : (
             <p>WhatsApp contact is not set up yet. Please use the form.</p>
           )}
-          {site.contactEmail && (
-            <p>Or email <a className="text-forest underline" href={`mailto:${site.contactEmail}`}>{site.contactEmail}</a>.</p>
+          {site.email && (
+            <p>Or email <a className="text-forest underline" href={`mailto:${site.email}`}>{site.email}</a>.</p>
           )}
         </aside>
       </div>
@@ -67,10 +68,10 @@ export default function BulkOrdersPage() {
 
 /** Reads the session to prefill known details, so it lives inside Suspense. */
 async function FormSection() {
-  const profile = await getProfile();
+  const [profile, site] = await Promise.all([getProfile(), getSite()]);
   return (
     <BulkForm
-      whatsappNumber={site.whatsappNumber}
+      whatsappNumber={site.whatsapp}
       defaults={{ fullName: profile?.fullName ?? "", email: profile?.email ?? "", phone: profile?.phone ?? "" }}
     />
   );
