@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { Suspense } from "react";
 import { AuthNav } from "@/components/layout/auth-nav";
+import { CartLink } from "@/components/layout/cart-link";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { site } from "@/lib/site";
@@ -41,6 +42,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <Header
           siteName={site.name}
+          cartSlot={
+            <Suspense fallback={<span className="inline-block h-9 w-9" aria-hidden />}>
+              <CartLink />
+            </Suspense>
+          }
           authSlot={
             <Suspense fallback={<span className="inline-block h-4 w-14" aria-hidden />}>
               <AuthNav />

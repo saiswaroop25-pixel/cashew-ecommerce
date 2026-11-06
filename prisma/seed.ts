@@ -153,6 +153,13 @@ async function main() {
       create: { step: i + 1, title, summary, qualityNote, isDemo: true },
     });
   }
+  // Demo coupon: 10% off orders of Rs 500 or more. Delete/replace in the admin dashboard before launch.
+  await prisma.coupon.upsert({
+    where: { code: "DEMO10" },
+    update: {},
+    create: { code: "DEMO10", type: "PERCENT", value: 10, minOrderPaise: 50_000 },
+  });
+
   console.log("Seed complete (demo data).");
 }
 

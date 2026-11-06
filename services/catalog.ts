@@ -26,6 +26,9 @@ export type ProductSummary = {
   imageAlt: string | null;
   fromPricePaise: number;
   inStock: boolean;
+  /** cheapest in-stock pack, used for the card's quick-add button */
+  quickVariantId: string | null;
+  quickVariantLabel: string | null;
   isDemo: boolean;
   popularity: number;
   createdAt: Date;
@@ -48,6 +51,8 @@ function summarise(p: ListedProduct): ProductSummary {
     imageAlt: p.images[0]?.alt ?? null,
     fromPricePaise: prices.length ? Math.min(...prices) : 0,
     inStock: p.variants.some(available),
+    quickVariantId: p.variants.find(available)?.id ?? null,
+    quickVariantLabel: p.variants.find(available)?.label ?? null,
     isDemo: p.isDemo,
     popularity: p.popularity,
     createdAt: p.createdAt,
@@ -163,4 +168,18 @@ export async function listFeaturedProducts(limit = 4) {
     orderBy: { popularity: "desc" },
   });
   return rows.map(summarise);
+}
+
+export async function listWishlistProducts(profileId: string) {
+  const items = await prisma.wishlistItem.findMany({
+    where: { wishlist: { profileId }, product: { isActive: true } },
+    orderBy: { createdAt: "desc" },
+    include: { product: { include: listInclude } },
+  });
+  return items.map((i) => summarise(i.product));
+}
+
+export async function isProductWishlisted(profileId: string, productId: string) {
+  const n = await prisma.wishlistItem.count({ where: { productId, wishlist: { profileId } } });
+  return n > 0;
 }

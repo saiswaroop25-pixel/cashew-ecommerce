@@ -288,6 +288,7 @@ model Cart {
   id         String   @id @default(cuid())
   profileId  String?  @unique @db.Uuid
   guestToken String?  @unique
+  couponCode String? // applied coupon (re-validated on every price calculation)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -352,6 +353,7 @@ model Coupon {
 model Order {
   id            String      @id @default(cuid())
   orderNumber   String      @unique
+  accessToken   String      @unique // unguessable; lets guests open their own order page
   profileId     String?     @db.Uuid
   status        OrderStatus @default(PENDING_PAYMENT)
   email         String

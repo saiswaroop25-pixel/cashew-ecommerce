@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { safeNext } from "@/lib/auth/safe-next";
 import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
+import { mergeGuestCart } from "@/services/cart";
 import {
   echoValues,
   fieldErrors,
@@ -55,7 +56,7 @@ export async function signIn(_prev: FormState, fd: FormData): Promise<FormState>
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
     return {
       ok: false,
@@ -66,6 +67,8 @@ export async function signIn(_prev: FormState, fd: FormData): Promise<FormState>
           : GENERIC_LOGIN_ERROR,
     };
   }
+  // Keep anything they added to the cart before signing in.
+  if (data.user) await mergeGuestCart(data.user.id);
   redirect(safeNext(fd.get("next")));
 }
 

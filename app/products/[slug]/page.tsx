@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
+import { AddToCart } from "@/components/shop/add-to-cart";
 import { ProductCard } from "@/components/shop/product-card";
-import { formatINR } from "@/lib/utils";
 import { GRADE_LABELS, type GRADES } from "@/lib/validators/catalog";
-import { getProductBySlug, listRelatedProducts } from "@/services/catalog";
+import { getSessionUser } from "@/lib/auth/dal";
+import { WishlistButton } from "@/components/shop/wishlist-button";
+import { getProductBySlug, isProductWishlisted, listRelatedProducts } from "@/services/catalog";
 
 type Params = Promise<{ slug: string }>;
 
@@ -34,7 +36,8 @@ async function ProductDetail({ params }: { params: Params }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
-  const related = await listRelatedProducts(product.id, product.category.slug);
+  const [related, user] = await Promise.all([listRelatedProducts(product.id, product.category.slug), getSessionUser()]);
+  const wishlisted = user ? await isProductWishlisted(user.id, product.id) : false;
   const grade = GRADE_LABELS[product.grade as (typeof GRADES)[number] | "NA"];
   const specs = (product.specifications ?? {}) as Record<string, string>;
 
@@ -59,21 +62,21 @@ async function ProductDetail({ params }: { params: Params }) {
           {grade !== "—" && <p className="mt-1 text-gold">Grade {grade}</p>}
           <p className="mt-4 text-chocolate">{product.description}</p>
 
-          <h2 className="mt-8 font-serif text-xl text-forest">Pack sizes</h2>
-          <ul className="mt-3 space-y-2">
-            {product.variants.map((v) => (
-              <li key={v.id} className="flex items-center justify-between rounded-lg bg-white px-4 py-3 shadow-soft">
-                <span className="text-chocolate">{v.label}</span>
-                <span className="flex items-center gap-4">
-                  <span className="text-brown">{formatINR(v.priceInPaise)}</span>
-                  <span className={v.inStock ? "text-xs text-forest" : "text-xs text-brown/60"}>
-                    {v.inStock ? "In stock" : "Out of stock"}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-xs text-brown">Add to cart arrives in the cart &amp; checkout phase.</p>
+          <div className="mt-8">
+            <AddToCart
+              options={product.variants.map((v) => ({
+                id: v.id,
+                label: v.label,
+                priceInPaise: v.priceInPaise,
+                compareAtPaise: v.compareAtPaise,
+                inStock: v.inStock,
+              }))}
+            />
+          </div>
+
+          <div className="mt-5">
+            <WishlistButton productId={product.id} saved={wishlisted} returnTo={`/products/${product.slug}`} />
+          </div>
 
           <dl className="mt-8 space-y-4 text-sm">
             {product.storageInstruction && <Info label="Storage" value={product.storageInstruction} />}

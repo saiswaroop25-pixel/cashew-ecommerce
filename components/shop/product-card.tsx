@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { QuickAdd } from "@/components/shop/quick-add";
 import { formatINR } from "@/lib/utils";
 import { GRADE_LABELS, type GRADES } from "@/lib/validators/catalog";
 import type { ProductSummary } from "@/services/catalog";
@@ -7,10 +8,8 @@ import type { ProductSummary } from "@/services/catalog";
 export function ProductCard({ product }: { product: ProductSummary }) {
   const grade = GRADE_LABELS[product.grade as (typeof GRADES)[number] | "NA"];
   return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-card bg-white shadow-soft transition-transform duration-300 hover:-translate-y-1"
-    >
+    <div className="group flex h-full flex-col overflow-hidden rounded-card bg-white shadow-soft transition-transform duration-300 hover:-translate-y-1">
+      <Link href={`/products/${product.slug}`} className="flex flex-1 flex-col">
       <div className="relative aspect-square bg-cashew/40">
         {product.imageUrl ? (
           <Image
@@ -44,6 +43,10 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           </span>
         </div>
       </div>
-    </Link>
+      </Link>
+      <div className="px-4 pb-4">
+        <QuickAdd variantId={product.quickVariantId} label={product.quickVariantLabel} productName={product.name} />
+      </div>
+    </div>
   );
 }

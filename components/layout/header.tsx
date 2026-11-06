@@ -7,7 +7,7 @@ import { useState } from "react";
 // Only routes that exist. New pages are added here as their phases ship.
 const links = [{ href: "/shop", label: "Shop" }];
 
-export function Header({ siteName, authSlot }: { siteName: string; authSlot?: React.ReactNode }) {
+export function Header({ siteName, authSlot, cartSlot }: { siteName: string; authSlot?: React.ReactNode; cartSlot?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 border-b border-cashew bg-cream/90 backdrop-blur">
@@ -16,25 +16,27 @@ export function Header({ siteName, authSlot }: { siteName: string; authSlot?: Re
           {siteName}
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-8 md:flex">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className="text-sm text-chocolate hover:text-forest">
-              {l.label}
-            </Link>
-          ))}
-          {authSlot}
-        </nav>
-
-        <button
-          type="button"
-          className="rounded-full p-2 text-forest hover:bg-cashew/50 md:hidden"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-2 md:gap-8">
+          <nav aria-label="Main" className="hidden items-center gap-8 md:flex">
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} className="text-sm text-chocolate hover:text-forest">
+                {l.label}
+              </Link>
+            ))}
+            {authSlot}
+          </nav>
+          {cartSlot}
+          <button
+            type="button"
+            className="rounded-full p-2 text-forest hover:bg-cashew/50 md:hidden"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {open && (
