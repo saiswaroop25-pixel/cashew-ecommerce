@@ -154,3 +154,13 @@ export async function listRelatedProducts(productId: string, categorySlug: strin
   });
   return rows.map(summarise);
 }
+
+export async function listFeaturedProducts(limit = 4) {
+  const rows = await prisma.product.findMany({
+    where: { isActive: true, isFeatured: true },
+    include: listInclude,
+    take: limit,
+    orderBy: { popularity: "desc" },
+  });
+  return rows.map(summarise);
+}
