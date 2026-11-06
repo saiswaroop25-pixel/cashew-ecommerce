@@ -7,9 +7,12 @@ import { echoValues, fieldErrors, type FormState } from "@/lib/validators/auth";
 import { checkoutSchema } from "@/lib/validators/checkout";
 import { getCartView } from "@/services/cart";
 import { CheckoutError, createPendingOrder } from "@/services/orders";
+import { rateLimited } from "@/services/rate-limit";
 
 export async function placeOrder(_prev: FormState, fd: FormData): Promise<FormState> {
   const values = echoValues(fd);
+  const limited = await rateLimited("checkout");
+  if (limited) return { ok: false, message: limited, values };
   const parsed = checkoutSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 

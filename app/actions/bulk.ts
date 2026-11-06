@@ -5,6 +5,7 @@ import { echoValues, fieldErrors, type FormState } from "@/lib/validators/auth";
 import { makeBulkEnquirySchema } from "@/lib/validators/bulk";
 import { RateLimitError, createBulkEnquiry } from "@/services/bulk";
 import { sendBulkEnquiryEmails } from "@/services/email";
+import { rateLimited } from "@/services/rate-limit";
 
 export type BulkFormState = FormState & { reference?: string };
 
@@ -12,6 +13,8 @@ const SUCCESS_MESSAGE = "Thank you! Your enquiry has been received.";
 
 export async function submitBulkEnquiry(_prev: BulkFormState, fd: FormData): Promise<BulkFormState> {
   const values = echoValues(fd);
+  const limited = await rateLimited("bulkEnquiry");
+  if (limited) return { ok: false, message: limited, values };
   const now = new Date();
   const parsed = makeBulkEnquirySchema(now).safeParse(Object.fromEntries(fd));
 

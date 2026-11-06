@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { deepErrors } from "@/lib/admin/forms";
 import { requireAdmin } from "@/lib/auth/dal";
@@ -24,6 +24,7 @@ export async function saveProductAction(_prev: FormState, fd: FormData): Promise
     console.error("saveProductAction failed", e);
     return { ok: false, message: "Could not save the product. Please try again." };
   }
+  updateTag("products"); // sitemap + product lookups refresh immediately
   revalidatePath("/admin/products");
   revalidatePath("/shop");
   revalidatePath(`/products/${parsed.data.slug}`);
@@ -36,6 +37,7 @@ export async function setProductActiveAction(fd: FormData): Promise<void> {
   const id = String(fd.get("id") ?? "");
   if (!id) return;
   await setProductActive(id, fd.get("active") === "true", { id: admin.id, email: admin.email });
+  updateTag("products");
   revalidatePath("/admin/products");
   revalidatePath("/shop");
 }
@@ -51,6 +53,7 @@ export async function deleteProductAction(_prev: FormState, fd: FormData): Promi
     console.error("deleteProductAction failed", e);
     return { ok: false, message: "Could not delete the product." };
   }
+  updateTag("products");
   revalidatePath("/admin/products");
   revalidatePath("/shop");
   redirect("/admin/products?deleted=1");

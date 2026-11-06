@@ -14,11 +14,14 @@ import {
   resetSchema,
   type FormState,
 } from "@/lib/validators/auth";
+import { rateLimited } from "@/services/rate-limit";
 
 const GENERIC_LOGIN_ERROR = "Invalid email or password.";
 
 export async function signUp(_prev: FormState, fd: FormData): Promise<FormState> {
   const values = echoValues(fd);
+  const limited = await rateLimited("signup");
+  if (limited) return { ok: false, message: limited, values };
   const parsed = registerSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 
@@ -52,6 +55,9 @@ export async function signUp(_prev: FormState, fd: FormData): Promise<FormState>
 
 export async function signIn(_prev: FormState, fd: FormData): Promise<FormState> {
   const values = echoValues(fd);
+  // limit per address AND per account being tried (stops password guessing against one email)
+  const limited = await rateLimited("login", String(fd.get("email") ?? "").trim());
+  if (limited) return { ok: false, message: limited, values };
   const parsed = loginSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 
@@ -80,6 +86,8 @@ export async function signOut() {
 
 export async function requestPasswordReset(_prev: FormState, fd: FormData): Promise<FormState> {
   const values = echoValues(fd);
+  const limited = await rateLimited("passwordReset", String(fd.get("email") ?? "").trim());
+  if (limited) return { ok: false, message: limited, values };
   const parsed = forgotSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 

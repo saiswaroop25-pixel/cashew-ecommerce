@@ -15,6 +15,7 @@ import {
   finalizePaymentSuccess,
   type CheckoutParams,
 } from "@/services/payments";
+import { rateLimited } from "@/services/rate-limit";
 
 const idSchema = z.string().min(1).max(60);
 
@@ -28,6 +29,8 @@ export async function startPayment(
   token: string | null,
 ): Promise<{ ok: true; params: CheckoutParams } | { ok: false; message: string }> {
   if (!idSchema.safeParse(orderId).success) return { ok: false, message: "Invalid order." };
+  const limited = await rateLimited("payment");
+  if (limited) return { ok: false, message: limited };
   const order = await authorise(orderId, token);
   if (!order) return { ok: false, message: "Order not found." };
   if (order.status !== "PENDING_PAYMENT") return { ok: false, message: "This order is no longer awaiting payment." };

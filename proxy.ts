@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isUnknownLegalPath } from "@/lib/legal";
 
 /**
  * Runs before matched requests to (1) refresh the Supabase session cookie and
@@ -9,6 +10,10 @@ import { NextResponse, type NextRequest } from "next/server";
 const PRIVATE_PREFIXES = ["/account", "/admin"];
 
 export async function proxy(request: NextRequest) {
+  // Unknown policy pages: answer 404 right away (the page itself would stream a 200 before it knew).
+  if (isUnknownLegalPath(request.nextUrl.pathname)) {
+    return NextResponse.rewrite(new URL("/_missing", request.url), { status: 404 });
+  }
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

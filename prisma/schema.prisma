@@ -590,3 +590,13 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
 }
+
+/// Fixed-window request counters for rate limiting. Keys are hashed (no raw IPs or emails are stored).
+model RateLimit {
+  key         String
+  windowStart DateTime
+  count       Int      @default(1)
+
+  @@id([key, windowStart])
+  @@index([windowStart])
+}

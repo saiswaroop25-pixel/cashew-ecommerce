@@ -6,6 +6,7 @@ import { z } from "zod";
 import { MAX_QTY_PER_LINE, clampQuantity, evaluateCoupon } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { findCartId, getCartView, getOrCreateCartId, lookupCoupon } from "@/services/cart";
+import { rateLimited } from "@/services/rate-limit";
 
 export type CartActionState = { ok: boolean; message?: string };
 
@@ -23,6 +24,8 @@ export async function addToCart(
 ): Promise<CartActionState> {
   const parsedId = id.safeParse(variantId);
   if (!parsedId.success) return { ok: false, message: "Invalid product." };
+  const limited = await rateLimited("cartAdd");
+  if (limited) return { ok: false, message: limited };
   const qty = clampQuantity(quantity);
 
   const variant = await prisma.productVariant.findFirst({
@@ -79,6 +82,8 @@ export async function removeItem(itemId: string): Promise<void> {
 }
 
 export async function applyCoupon(_prev: CartActionState, fd: FormData): Promise<CartActionState> {
+  const limited = await rateLimited("coupon"); // stops guessing coupon codes
+  if (limited) return { ok: false, message: limited };
   const code = String(fd.get("code") ?? "").trim().toUpperCase();
   if (!/^[A-Z0-9_-]{2,30}$/.test(code)) return { ok: false, message: "Enter a valid coupon code." };
 

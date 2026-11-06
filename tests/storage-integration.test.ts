@@ -101,7 +101,7 @@ describe("storage layer enforces limits on its own (defence in depth)", () => {
     const { error } = await anon.storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, big, { contentType: "image/png" });
     expect(error).not.toBeNull();
     expect(await exists(ticket.bucket, ticket.path)).toBe(false);
-  });
+  }, 120_000); // uploads 6 MB: slow on a busy connection
 
   it("an anonymous visitor cannot upload without a token, nor delete or list objects", async () => {
     const path = `product-image/${randomUUID()}.png`;

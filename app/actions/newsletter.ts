@@ -2,10 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { newsletterSchema, type NewsletterState } from "@/lib/validators/newsletter";
+import { rateLimited } from "@/services/rate-limit";
 
 const SUCCESS = "Thank you! You are subscribed. You can unsubscribe at any time.";
 
 export async function subscribeNewsletter(_prev: NewsletterState, formData: FormData): Promise<NewsletterState> {
+  const limited = await rateLimited("newsletter");
+  if (limited) return { ok: false, message: limited };
   const parsed = newsletterSchema.safeParse({
     email: formData.get("email"),
     consent: formData.get("consent") ?? undefined,
