@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BannerStrip } from "@/components/home/banner-strip";
 import { NewsletterForm } from "@/components/home/newsletter-form";
 import { ProcessFlow } from "@/components/home/process-flow";
-import { Scene3D } from "@/components/three/scene-3d";
+import { HeroCashews } from "@/components/home/hero-cashews";
 import { ProductCard } from "@/components/shop/product-card";
 import { LinkButton, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,11 @@ import { listFeaturedProducts } from "@/services/catalog";
 import { getActiveBanners } from "@/services/banners";
 import { getProcessFlow } from "@/services/manufacturing";
 import { getSite } from "@/services/site";
+
+export const metadata: Metadata = {
+  description: "Whole, roasted and salted cashews in a range of grades, for your kitchen or your business. Shop online or request a bulk quotation.",
+  alternates: { canonical: "/" },
+};
 
 const container = "mx-auto w-full max-w-7xl px-4 sm:px-6";
 
@@ -70,8 +76,8 @@ function Hero() {
             <LinkButton href="/bulk-orders" variant="outline" size="lg">Explore bulk orders</LinkButton>
           </div>
         </div>
-        {/* Decorative 3D scene; the static illustration shows first and for reduced-motion / low-power visitors */}
-        <Scene3D variant="hero" className="aspect-[4/3] w-full md:aspect-square" />
+        {/* Decorative photographs of real cashew kernels, drifting slowly (static for reduced-motion visitors) */}
+        <HeroCashews className="mx-auto max-w-md md:max-w-none" />
       </div>
     </section>
   );
