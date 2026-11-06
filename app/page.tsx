@@ -5,6 +5,7 @@ import { ProductCard } from "@/components/shop/product-card";
 import { LinkButton, buttonVariants } from "@/components/ui/button";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { bulkEnquiryWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
 import { listFeaturedProducts } from "@/services/catalog";
 import { getManufacturingStages, getNutritionHighlights } from "@/services/home";
 
@@ -51,9 +52,7 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <LinkButton href="/shop" size="lg">Shop now</LinkButton>
-            <a href="#bulk" className={buttonVariants({ variant: "outline", size: "lg" })}>
-              Explore bulk orders
-            </a>
+            <LinkButton href="/bulk-orders" variant="outline" size="lg">Explore bulk orders</LinkButton>
           </div>
         </div>
       </div>
@@ -176,9 +175,7 @@ async function Nutrition() {
 }
 
 function BulkOrders() {
-  const wa = site.whatsappNumber
-    ? `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent("Hello, I would like to enquire about bulk cashew orders.")}`
-    : null;
+  const wa = whatsappLink(site.whatsappNumber, bulkEnquiryWhatsAppMessage());
   return (
     <section id="bulk" className="scroll-mt-20 bg-cashew/50 py-16">
       <div className={cn(container, "grid items-center gap-8 md:grid-cols-2")}>
@@ -186,16 +183,15 @@ function BulkOrders() {
           <p className="text-xs uppercase tracking-[0.3em] text-gold">Wholesale &amp; bulk</p>
           <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">Buying in volume?</h2>
           <p className="mt-4 text-brown">
-            Distributors, retailers, hotels and restaurants can enquire about bulk quantities and custom packaging.
+            Distributors, retailers, hotels and restaurants can request a quotation for bulk quantities and custom packaging.
           </p>
         </div>
         <div className="flex flex-wrap gap-4 md:justify-end">
-          {wa ? (
-            <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonVariants({ size: "lg" })}>
+          <LinkButton href="/bulk-orders" size="lg">Request a quotation</LinkButton>
+          {wa && (
+            <a href={wa} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "lg" })}>
               Enquire on WhatsApp
             </a>
-          ) : (
-            <p className="text-sm text-brown">The bulk enquiry form is coming soon.</p>
           )}
         </div>
       </div>

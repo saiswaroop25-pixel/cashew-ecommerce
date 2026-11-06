@@ -5,7 +5,10 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
 // Only routes that exist. New pages are added here as their phases ship.
-const links = [{ href: "/shop", label: "Shop" }];
+const links = [
+  { href: "/shop", label: "Shop" },
+  { href: "/bulk-orders", label: "Bulk orders" },
+];
 
 export function Header({ siteName, authSlot, cartSlot }: { siteName: string; authSlot?: React.ReactNode; cartSlot?: React.ReactNode }) {
   const [open, setOpen] = useState(false);

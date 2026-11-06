@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
 import { formatINR } from "@/lib/utils";
+import { PACKAGING_OPTIONS, type PackagingKey } from "@/lib/validators/bulk";
 
 /** Escape user-supplied text before it goes into an HTML email. */
 export const esc = (s: string) =>
@@ -76,5 +77,44 @@ export async function sendOrderPaidEmails(orderId: string) {
         `<h2>New paid order ${esc(order.orderNumber)}</h2>${summary}<p>${address}<br>${esc(order.phone)} / ${esc(order.email)}</p>${order.notes ? `<p>Notes: ${esc(order.notes)}</p>` : ""}`,
       ),
     });
+  }
+}
+
+/** Acknowledgement to the buyer + full details to the business. */
+export async function sendBulkEnquiryEmails(enquiryId: string) {
+  const e = await prisma.bulkEnquiry.findUnique({ where: { id: enquiryId } });
+  if (!e) return;
+
+  const packaging = PACKAGING_OPTIONS[e.packaging as PackagingKey] ?? e.packaging ?? "-";
+  const details = `
+    <table style="border-collapse:collapse;font-size:14px">
+      <tr><td style="padding:3px 12px 3px 0;color:#795438">Reference</td><td><strong>${esc(e.reference)}</strong></td></tr>
+      <tr><td style="padding:3px 12px 3px 0;color:#795438">Variety / grade</td><td>${esc(e.variety)} / ${esc(e.grade ?? "-")}</td></tr>
+      <tr><td style="padding:3px 12px 3px 0;color:#795438">Quantity</td><td>${e.quantityKg} kg</td></tr>
+      <tr><td style="padding:3px 12px 3px 0;color:#795438">Packaging</td><td>${esc(packaging)}</td></tr>
+      <tr><td style="padding:3px 12px 3px 0;color:#795438">Delivery by</td><td>${e.expectedDelivery ? e.expectedDelivery.toISOString().slice(0, 10) : "-"}</td></tr>
+      <tr><td style="padding:3px 12px 3px 0;color:#795438">Location</td><td>${esc(e.location)}</td></tr>
+    </table>
+    ${e.requirements ? `<p><strong>Additional requirements</strong><br>${esc(e.requirements).replace(/\n/g, "<br>")}</p>` : ""}`;
+
+  await sendEmail({
+    to: e.email,
+    subject: `We received your enquiry ${e.reference}`,
+    html: wrap(`<h2 style="color:#344b35">Thank you, ${esc(e.fullName)}</h2>
+      <p>We have received your bulk enquiry and will get back to you with a quotation.</p>${details}
+      <p style="color:#795438;font-size:12px">Please quote your reference number in any follow-up.</p>`),
+  });
+
+  const admin = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (admin) {
+    await sendEmail({
+      to: admin,
+      subject: `New bulk enquiry ${e.reference} - ${e.quantityKg} kg from ${e.companyName}`,
+      html: wrap(`<h2>New bulk enquiry ${esc(e.reference)}</h2>
+        <p><strong>${esc(e.fullName)}</strong>, ${esc(e.companyName)}<br>
+        ${esc(e.email)} / ${esc(e.phone)}${e.whatsapp ? ` / WhatsApp ${esc(e.whatsapp)}` : ""}</p>${details}`),
+    });
+  } else {
+    console.warn(`[bulk enquiry ${e.reference}] ADMIN_NOTIFICATION_EMAIL is not set - nobody was notified`);
   }
 }
