@@ -45,11 +45,11 @@ export default async function AdminEnquiryPage({ params }: { params: Promise<{ i
           <section className="rounded-card bg-white p-6 text-sm shadow-soft" aria-labelledby="req-h">
             <h2 id="req-h" className="font-serif text-xl text-forest">Requirement</h2>
             <dl className="mt-3 grid grid-cols-2 gap-3">
-              <div><dt className="text-xs uppercase tracking-widest text-gold">Variety</dt><dd className="text-chocolate">{e.variety}</dd></div>
-              <div><dt className="text-xs uppercase tracking-widest text-gold">Grade</dt><dd className="text-chocolate">{e.grade ?? "–"}</dd></div>
-              <div><dt className="text-xs uppercase tracking-widest text-gold">Quantity</dt><dd className="text-chocolate">{e.quantityKg} kg</dd></div>
-              <div><dt className="text-xs uppercase tracking-widest text-gold">Packaging</dt><dd className="text-chocolate">{PACKAGING_OPTIONS[e.packaging as PackagingKey] ?? e.packaging ?? "–"}</dd></div>
-              <div><dt className="text-xs uppercase tracking-widest text-gold">Delivery by</dt><dd className="text-chocolate">{e.expectedDelivery ? e.expectedDelivery.toISOString().slice(0, 10) : "–"}</dd></div>
+              <div><dt className="text-xs uppercase tracking-widest text-gold-text">Variety</dt><dd className="text-chocolate">{e.variety}</dd></div>
+              <div><dt className="text-xs uppercase tracking-widest text-gold-text">Grade</dt><dd className="text-chocolate">{e.grade ?? "–"}</dd></div>
+              <div><dt className="text-xs uppercase tracking-widest text-gold-text">Quantity</dt><dd className="text-chocolate">{e.quantityKg} kg</dd></div>
+              <div><dt className="text-xs uppercase tracking-widest text-gold-text">Packaging</dt><dd className="text-chocolate">{PACKAGING_OPTIONS[e.packaging as PackagingKey] ?? e.packaging ?? "–"}</dd></div>
+              <div><dt className="text-xs uppercase tracking-widest text-gold-text">Delivery by</dt><dd className="text-chocolate">{e.expectedDelivery ? e.expectedDelivery.toISOString().slice(0, 10) : "–"}</dd></div>
             </dl>
             {e.requirements && <p className="mt-4 whitespace-pre-wrap rounded-lg bg-cashew/40 p-3 text-chocolate">{e.requirements}</p>}
           </section>

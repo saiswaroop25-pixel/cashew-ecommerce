@@ -24,7 +24,7 @@ export function OrderSummary({ totals, couponCode }: { totals: Totals; couponCod
           </div>
         </div>
       )}
-      <p className="mt-3 text-xs text-brown/70">Prices are in INR. Shipping shown is a demo rule until final rates are set.</p>
+      <p className="mt-3 text-xs text-brown">Prices are in INR. Shipping shown is a demo rule until final rates are set.</p>
     </div>
   );
 }

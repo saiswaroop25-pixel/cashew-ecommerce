@@ -29,9 +29,9 @@ async function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 md:grid-cols-[12rem_1fr]">
       <aside className="md:sticky md:top-24 md:h-fit">
-        <p className="mb-3 hidden text-xs uppercase tracking-[0.3em] text-gold md:block">Admin</p>
+        <p className="mb-3 hidden text-xs uppercase tracking-[0.3em] text-gold-text md:block">Admin</p>
         <AdminNav />
-        <p className="mt-4 hidden truncate text-xs text-brown/70 md:block" title={admin.email}>{admin.email}</p>
+        <p className="mt-4 hidden truncate text-xs text-brown md:block" title={admin.email}>{admin.email}</p>
       </aside>
       <div className="min-w-0">{children}</div>
     </div>

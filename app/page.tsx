@@ -35,7 +35,7 @@ export default function Home() {
       <WhyChooseUs />
       <section id="process" className="scroll-mt-20 bg-white py-16">
         <div className={container}>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">Our process</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Our process</p>
           <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">From fruit to finished pack</h2>
           <div className="mt-8">
             <Suspense fallback={<Skeleton />}>
@@ -64,7 +64,7 @@ function Hero() {
       <div aria-hidden className="pointer-events-none absolute right-24 top-40 h-56 w-56 rounded-full bg-gold/30" />
       <div className={cn(container, "relative grid items-center gap-6 py-14 md:grid-cols-2 md:py-24")}>
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">Premium cashews</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Premium cashews</p>
           <h1 className="mt-4 font-serif text-5xl leading-[1.1] text-forest md:text-6xl">
             Cashews, chosen with care.
           </h1>
@@ -96,7 +96,7 @@ function Section({
 }) {
   return (
     <section className={cn(container, "py-16", className)}>
-      <p className="text-xs uppercase tracking-[0.3em] text-gold">{eyebrow}</p>
+      <p className="text-xs uppercase tracking-[0.3em] text-gold-text">{eyebrow}</p>
       <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">{title}</h2>
       <div className="mt-8">{children}</div>
     </section>
@@ -131,13 +131,13 @@ function WhyChooseUs() {
   return (
     <section className="bg-white py-16">
       <div className={container}>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">Why choose us</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Why choose us</p>
         <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">What we stand for</h2>
         <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {strengths.map((s) => (
             <li key={s} className="rounded-card border border-cashew p-6">
               <h3 className="font-serif text-xl text-chocolate">{s}</h3>
-              <p className="mt-2 text-sm text-brown/80">
+              <p className="mt-2 text-sm text-brown">
                 Placeholder – the business will add verified details here.
               </p>
             </li>
@@ -156,7 +156,7 @@ async function Process() {
       <p className="mb-4 max-w-2xl text-brown">Follow the journey from the tree to the sealed pack, step by step.</p>
       <ProcessFlow steps={steps} />
       {steps.some((s) => s.isDemo) && (
-        <p className="mt-2 text-xs text-brown/70">
+        <p className="mt-2 text-xs text-brown">
           General description of how cashews are processed (placeholder wording) – not a description of our own facility.
         </p>
       )}
@@ -171,7 +171,7 @@ async function BulkOrders() {
     <section id="bulk" className="scroll-mt-20 bg-cashew/50 py-16">
       <div className={cn(container, "grid items-center gap-8 md:grid-cols-2")}>
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">Wholesale &amp; bulk</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Wholesale &amp; bulk</p>
           <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">Buying in volume?</h2>
           <p className="mt-4 text-brown">
             Distributors, retailers, hotels and restaurants can request a quotation for bulk quantities and custom packaging.

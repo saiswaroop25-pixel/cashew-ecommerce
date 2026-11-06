@@ -77,7 +77,7 @@ export function Uploader({
       <Button type="button" variant="outline" size="sm" disabled={busy || disabled} onClick={() => inputRef.current?.click()}>
         {busy ? "Uploading…" : buttonLabel}
       </Button>
-      <p className="mt-1 text-xs text-brown/70">{UPLOAD_RULES[kind].label}</p>
+      <p className="mt-1 text-xs text-brown">{UPLOAD_RULES[kind].label}</p>
       <p role="status" className="min-h-4 text-xs text-forest">{done ? `Uploaded: ${done}` : ""}</p>
       <p role="alert" className="min-h-4 text-xs text-red-700">{error}</p>
     </div>

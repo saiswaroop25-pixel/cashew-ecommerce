@@ -70,7 +70,7 @@ function Area({ label, name, value, onChange, rows = 3, error, hint }: { label: 
     <div>
       <label htmlFor={`p-${name}`} className="mb-1 block text-sm text-brown">{label}</label>
       <textarea id={`p-${name}`} name={name} rows={rows} value={value} onChange={(e) => onChange(e.target.value)} className={cn(input, error ? "border-red-700" : "border-cashew")} />
-      {hint && !error && <p className="mt-1 text-xs text-brown/70">{hint}</p>}
+      {hint && !error && <p className="mt-1 text-xs text-brown">{hint}</p>}
       {error && <p className="mt-1 text-xs text-red-700">{error}</p>}
     </div>
   );
@@ -143,7 +143,7 @@ export function ProductForm({
             const ve = (k: string) => e[`variants.${i}.${k}`];
             return (
               <fieldset key={v.id ?? `new-${i}`} className="rounded-lg border border-cashew p-4">
-                <legend className="px-1 text-xs uppercase tracking-widest text-gold">Pack {i + 1}{v.id ? "" : " (new)"}</legend>
+                <legend className="px-1 text-xs uppercase tracking-widest text-gold-text">Pack {i + 1}{v.id ? "" : " (new)"}</legend>
                 <div className="grid gap-3 sm:grid-cols-4">
                   <Field label="Label" name={`v${i}-label`} value={v.label} onChange={(ev) => setVariant(i, { label: ev.target.value })} error={ve("label")} placeholder="250 g" />
                   <Field label="Weight (g)" name={`v${i}-w`} inputMode="numeric" value={v.weightGrams} onChange={(ev) => setVariant(i, { weightGrams: ev.target.value })} error={ve("weightGrams")} />

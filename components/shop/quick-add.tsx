@@ -19,7 +19,7 @@ export function QuickAdd({ variantId, label, productName }: { variantId: string 
         size="sm"
         className="w-full"
         disabled={pending}
-        aria-label={`Add ${productName}${label ? ` (${label})` : ""} to cart`}
+        aria-label={`Add ${label ?? ""} to cart, ${productName}`.replace("Add  to","Add to")}
         onClick={() =>
           start(async () => {
             const res = await addToCart(variantId, 1);

@@ -38,7 +38,7 @@ export default async function OrdersPage() {
           </div>
           <div className="text-right">
             <p className="text-brown">{formatINR(o.totalPaise)}</p>
-            <p className="text-xs uppercase tracking-widest text-gold">{STATUS_LABEL[o.status] ?? o.status}</p>
+            <p className="text-xs uppercase tracking-widest text-gold-text">{STATUS_LABEL[o.status] ?? o.status}</p>
           </div>
          </Link>
         </li>

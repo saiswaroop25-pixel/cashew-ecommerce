@@ -48,7 +48,7 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
               {customers.map((c) => (
                 <tr key={c.id} className={tableClasses.row}>
                   <td className={tableClasses.td}>
-                    {c.fullName ?? <span className="text-brown/70">No name</span>} {c.role === "ADMIN" && <Badge value="PROCESSING" label="Admin" />}
+                    {c.fullName ?? <span className="text-brown">No name</span>} {c.role === "ADMIN" && <Badge value="PROCESSING" label="Admin" />}
                     <br /><span className="text-xs text-brown">{c.email}</span>
                   </td>
                   <td className={tableClasses.td}>{c.phone ?? "–"}</td>

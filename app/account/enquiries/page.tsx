@@ -40,12 +40,12 @@ export default async function EnquiriesPage() {
         <li key={e.id} className="rounded-card bg-white p-5 shadow-soft">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-serif text-lg text-chocolate">{e.reference}</p>
-            <p className="text-xs uppercase tracking-widest text-gold">{STATUS_LABEL[e.status] ?? e.status}</p>
+            <p className="text-xs uppercase tracking-widest text-gold-text">{STATUS_LABEL[e.status] ?? e.status}</p>
           </div>
           <p className="mt-1 text-sm text-brown">
             {e.quantityKg} kg · {e.variety}{e.grade && e.grade !== "ANY" ? ` · ${e.grade}` : ""} · {PACKAGING_OPTIONS[e.packaging as PackagingKey] ?? e.packaging}
           </p>
-          <p className="text-xs text-brown/70">Sent {e.createdAt.toLocaleDateString("en-IN")}</p>
+          <p className="text-xs text-brown">Sent {e.createdAt.toLocaleDateString("en-IN")}</p>
         </li>
       ))}
     </ul>

@@ -8,6 +8,7 @@
   --forest: #344b35;
   --chocolate: #38271f;
   --gold: #c5a46d;
+  --gold-text: #7d5f22; /* darker gold for small text on light backgrounds (contrast >= 4.5:1) */
   --white: #ffffff;
 
   --background: var(--cream);
@@ -21,6 +22,7 @@
   --color-forest: var(--forest);
   --color-chocolate: var(--chocolate);
   --color-gold: var(--gold);
+  --color-gold-text: var(--gold-text);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 

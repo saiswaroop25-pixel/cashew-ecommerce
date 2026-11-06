@@ -42,7 +42,7 @@ async function CartBody() {
               {l.imageUrl ? (
                 <Image src={l.imageUrl} alt={l.imageAlt ?? l.productName} fill sizes="96px" className="object-cover" />
               ) : (
-                <span className="flex h-full items-center justify-center px-1 text-center text-[10px] text-brown/60">No image</span>
+                <span className="flex h-full items-center justify-center px-1 text-center text-[10px] text-brown">No image</span>
               )}
             </Link>
             <div className="flex flex-1 flex-col gap-2">

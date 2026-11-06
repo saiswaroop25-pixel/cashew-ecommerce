@@ -24,7 +24,7 @@ export default async function BulkOrdersPage() {
   const wa = whatsappLink(site.whatsapp, bulkEnquiryWhatsAppMessage());
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6">
-      <p className="text-xs uppercase tracking-[0.3em] text-gold">Wholesale &amp; bulk</p>
+      <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Wholesale &amp; bulk</p>
       <h1 className="mt-2 font-serif text-4xl text-forest md:text-5xl">Bulk orders</h1>
       <p className="mt-4 max-w-2xl text-lg text-brown">
         Distributors, retailers, hotels and restaurants can request a quotation for larger quantities and custom packaging.
@@ -33,7 +33,7 @@ export default async function BulkOrdersPage() {
       <ol className="mt-8 grid gap-4 sm:grid-cols-3">
         {steps.map((s, i) => (
           <li key={s.title} className="rounded-card border border-cashew p-5">
-            <span className="font-serif text-2xl text-gold">{String(i + 1).padStart(2, "0")}</span>
+            <span className="font-serif text-2xl text-gold-text">{String(i + 1).padStart(2, "0")}</span>
             <h2 className="mt-1 font-serif text-lg text-chocolate">{s.title}</h2>
             <p className="mt-1 text-sm text-brown">{s.text}</p>
           </li>

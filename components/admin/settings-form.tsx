@@ -27,7 +27,7 @@ export function SettingsForm({ saved }: { saved: SiteSettings }) {
         <div>
           <label htmlFor="about" className="mb-1 block text-sm text-brown">About you (optional)</label>
           <textarea id="about" name="about" rows={4} maxLength={1200} defaultValue={v("about")} className={`${area} ${e.about ? "border-red-700" : "border-cashew"}`} />
-          <p className="mt-1 text-xs text-brown/70">Shown in the footer. Only write what you can stand behind (history, certifications, quality claims).</p>
+          <p className="mt-1 text-xs text-brown">Shown in the footer. Only write what you can stand behind (history, certifications, quality claims).</p>
           {e.about && <p className="mt-1 text-xs text-red-700">{e.about}</p>}
         </div>
       </section>

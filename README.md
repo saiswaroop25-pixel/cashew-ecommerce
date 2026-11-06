@@ -28,6 +28,7 @@ Use Razorpay **test** keys until go-live. `NEXT_PUBLIC_SITE_URL` must be the rea
 | `npm run dev` / `build` / `start` | Develop / build / serve |
 | `npm run lint`, `npm run typecheck` | Static checks |
 | `npm test` | Vitest unit + integration tests (integration tests use the real dev database and storage with unique prefixes and clean up after themselves) |
+| `npm run test:e2e` | Browser tests (Playwright in Edge, against a production build on port 3100) including an accessibility scan; do not run at the same time as `npm test` because both use the dev database |
 | `npm run db:deploy` | Apply migrations (production) |
 
 ## Becoming an admin
@@ -64,4 +65,3 @@ update "Profile" set role = 'ADMIN' where email = 'you@example.com';
 ## Not yet done
 
 - Shipping provider integration (Shiprocket/Delhivery): shipping is currently a demo rule (free above a threshold, otherwise flat). Real rates are needed from the business.
-- Browser end-to-end tests (Playwright) and an automated accessibility scan.

@@ -103,7 +103,7 @@ async function ProductDetail({ params }: { params: Params }) {
             </p>
           )}
           <h1 className="font-serif text-4xl text-forest">{product.name}</h1>
-          {grade !== "—" && <p className="mt-1 text-gold">Grade {grade}</p>}
+          {grade !== "—" && <p className="mt-1 text-gold-text">Grade {grade}</p>}
           <p className="mt-4 text-chocolate">{product.description}</p>
 
           <div className="mt-8">
@@ -147,7 +147,7 @@ async function ProductDetail({ params }: { params: Params }) {
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-widest text-gold">{label}</dt>
+      <dt className="text-xs uppercase tracking-widest text-gold-text">{label}</dt>
       <dd className="text-chocolate">{value}</dd>
     </div>
   );

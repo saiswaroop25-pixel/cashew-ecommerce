@@ -27,7 +27,7 @@ export function ProcessFlow({ steps }: { steps: FlowStep[] }) {
         </button>
       </div>
 
-      <ol ref={strip} className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4" aria-label="Steps from cashew fruit to finished pack">
+      <ol ref={strip} tabIndex={0} className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4" aria-label="Steps from cashew fruit to finished pack (scroll sideways with the arrow keys)">
         {steps.map((s, i) => (
           <li key={s.id} className="relative w-64 shrink-0 snap-start sm:w-72">
             <article className="h-full overflow-hidden rounded-card bg-white shadow-soft">

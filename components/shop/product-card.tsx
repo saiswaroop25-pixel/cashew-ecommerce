@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-brown/60">
+          <div className="flex h-full items-center justify-center text-sm text-brown">
             Image coming soon
           </div>
         )}
@@ -31,14 +31,14 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
-        <p className="text-xs uppercase tracking-widest text-gold">
+        <p className="text-xs uppercase tracking-widest text-gold-text">
           {product.categoryName}
           {grade !== "—" && ` · ${grade}`}
         </p>
         <h3 className="font-serif text-lg leading-snug text-chocolate">{product.name}</h3>
         <div className="mt-auto flex items-center justify-between pt-3">
           <span className="text-brown">From {formatINR(product.fromPricePaise)}</span>
-          <span className={product.inStock ? "text-xs text-forest" : "text-xs text-brown/60"}>
+          <span className={product.inStock ? "text-xs text-forest" : "text-xs text-brown"}>
             {product.inStock ? "In stock" : "Out of stock"}
           </span>
         </div>

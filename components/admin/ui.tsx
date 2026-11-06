@@ -18,7 +18,7 @@ export function StatCard({ label, value, hint, href, tone = "default" }: { label
     <div className={cn("rounded-card p-5 shadow-soft", tone === "warn" ? "bg-gold/25" : "bg-white")}>
       <p className="text-xs uppercase tracking-widest text-brown">{label}</p>
       <p className="mt-2 font-serif text-3xl text-chocolate">{value}</p>
-      {hint && <p className="mt-1 text-xs text-brown/80">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-brown">{hint}</p>}
     </div>
   );
   return href ? <Link href={href} className="block transition-transform hover:-translate-y-0.5">{body}</Link> : body;

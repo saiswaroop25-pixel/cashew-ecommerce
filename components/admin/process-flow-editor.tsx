@@ -24,7 +24,7 @@ function StepCard({ step }: { step: FlowStep }) {
   return (
     <details className="rounded-card bg-white shadow-soft">
       <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4">
-        <span className="font-serif text-lg text-chocolate"><span className="mr-2 text-gold">{String(step.step).padStart(2, "0")}</span>{step.title}</span>
+        <span className="font-serif text-lg text-chocolate"><span className="mr-2 text-gold-text">{String(step.step).padStart(2, "0")}</span>{step.title}</span>
         <span className="flex gap-2">
           {step.isDemo && <span className="rounded-full bg-gold/40 px-2 py-0.5 text-xs text-chocolate">Placeholder text</span>}
           <span className={step.imageUrl ? "rounded-full bg-forest/10 px-2 py-0.5 text-xs text-forest" : "rounded-full bg-cashew px-2 py-0.5 text-xs text-brown"}>{step.imageUrl ? "Has picture" : "No picture"}</span>

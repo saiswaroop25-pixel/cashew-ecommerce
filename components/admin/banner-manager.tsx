@@ -51,7 +51,7 @@ function BannerCard({ b, index, count }: { b: BannerRow; index: number; count: n
     <li className="rounded-card bg-white p-5 shadow-soft">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 font-serif text-lg text-chocolate">
-          <span className="text-gold">{index + 1}</span> {b.title}
+          <span className="text-gold-text">{index + 1}</span> {b.title}
           <Badge value={b.isActive ? "ACTIVE" : "INACTIVE"} label={b.isActive ? "Showing" : "Hidden"} />
         </p>
         <div className="flex gap-1">
@@ -89,7 +89,7 @@ function BannerCard({ b, index, count }: { b: BannerRow; index: number; count: n
             const r = await setBannerImageAction(b.id, path);
             return r.ok ? null : (r.message ?? "Could not save the image.");
           }} />
-          <p className="mt-1 text-xs text-brown/70">Reload this page after uploading to see the new image here.</p>
+          <p className="mt-1 text-xs text-brown">Reload this page after uploading to see the new image here.</p>
         </div>
       </div>
 

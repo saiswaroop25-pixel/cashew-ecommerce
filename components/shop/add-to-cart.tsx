@@ -62,10 +62,10 @@ export function AddToCart({ options }: { options: PackOption[] }) {
               </span>
               <span className="flex items-center gap-3">
                 {o.compareAtPaise && o.compareAtPaise > o.priceInPaise && (
-                  <s className="text-xs text-brown/60">{formatINR(o.compareAtPaise)}</s>
+                  <s className="text-xs text-brown">{formatINR(o.compareAtPaise)}</s>
                 )}
                 <span className="text-brown">{formatINR(o.priceInPaise)}</span>
-                <span className={o.inStock ? "text-xs text-forest" : "text-xs text-brown/70"}>
+                <span className={o.inStock ? "text-xs text-forest" : "text-xs text-brown"}>
                   {o.inStock ? "In stock" : "Out of stock"}
                 </span>
               </span>

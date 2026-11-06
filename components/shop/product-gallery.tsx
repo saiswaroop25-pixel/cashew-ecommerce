@@ -17,7 +17,7 @@ export function ProductGallery({ photos, productName }: { photos: Photo[]; produ
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   if (photos.length === 0) {
-    return <div className="flex aspect-square items-center justify-center rounded-card bg-cashew/40 text-brown/60">Image coming soon</div>;
+    return <div className="flex aspect-square items-center justify-center rounded-card bg-cashew/40 text-brown">Image coming soon</div>;
   }
   const current = photos[Math.min(index, photos.length - 1)];
   const step = (d: number) => setIndex((i) => (i + d + photos.length) % photos.length);

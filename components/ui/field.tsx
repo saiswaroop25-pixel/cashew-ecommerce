@@ -28,7 +28,7 @@ export function Field({ label, error, hint, id, name, className, ...props }: Fie
         )}
         {...props}
       />
-      {hint && !error && <p className="mt-1 text-xs text-brown/70">{hint}</p>}
+      {hint && !error && <p className="mt-1 text-xs text-brown">{hint}</p>}
       {error && (
         <p id={errId} className="mt-1 text-xs text-red-700">
           {error}

@@ -18,7 +18,7 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-24 text-center">
-      <p className="text-xs uppercase tracking-[0.3em] text-gold">Something went wrong</p>
+      <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Something went wrong</p>
       <h1 className="mt-3 font-serif text-4xl text-forest">We hit a snag</h1>
       <p className="mt-4 text-brown">
         Sorry about that. Please try again. If it keeps happening, let us know and quote the reference below.

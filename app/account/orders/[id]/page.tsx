@@ -23,7 +23,7 @@ export default async function AccountOrderPage({ params }: { params: Promise<{ i
   return (
     <div>
       <Link href="/account/orders" className="text-sm text-forest underline">← All orders</Link>
-      <p className="mt-4 text-xs uppercase tracking-[0.3em] text-gold">Order {order.orderNumber}</p>
+      <p className="mt-4 text-xs uppercase tracking-[0.3em] text-gold-text">Order {order.orderNumber}</p>
       <h1 className="mt-1 font-serif text-3xl text-forest">{STATUS_LABEL[order.status] ?? order.status}</h1>
       <p className="mt-1 text-sm text-brown">Placed {order.createdAt.toLocaleDateString("en-IN")}</p>
 

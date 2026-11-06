@@ -40,7 +40,7 @@ async function Body({ params, searchParams }: Props) {
 
   return (
     <>
-      <p className="text-xs uppercase tracking-[0.3em] text-gold">Order {order.orderNumber}</p>
+      <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Order {order.orderNumber}</p>
 
       {order.status === "PENDING_PAYMENT" && (
         <>
