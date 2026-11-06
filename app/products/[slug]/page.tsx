@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AddToCart } from "@/components/shop/add-to-cart";
+import { ProductGallery } from "@/components/shop/product-gallery";
 import { ProductCard } from "@/components/shop/product-card";
 import { GRADE_LABELS, type GRADES } from "@/lib/validators/catalog";
 import { getSessionUser } from "@/lib/auth/dal";
@@ -48,9 +49,7 @@ async function ProductDetail({ params }: { params: Params }) {
       </nav>
 
       <div className="grid gap-10 md:grid-cols-2">
-        <div className="flex aspect-square items-center justify-center rounded-card bg-cashew/40 text-brown/60">
-          {product.images.length ? "Gallery (media phase)" : "Image coming soon"}
-        </div>
+        <ProductGallery photos={product.images.map((i) => ({ url: i.url, alt: i.alt }))} productName={product.name} />
 
         <div>
           {product.isDemo && (

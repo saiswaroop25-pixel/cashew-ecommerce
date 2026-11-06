@@ -192,7 +192,7 @@ export function ProductForm({
 
       <div className="flex items-center gap-4">
         <Button type="submit" size="lg" disabled={pending}>{pending ? "Saving…" : isEdit ? "Save changes" : "Create product"}</Button>
-        <p className="text-xs text-brown">Product photos are added in the next release (media uploads).</p>
+        <p className="text-xs text-brown">{isEdit ? "Photos are managed in the Photos section above." : "After creating the product you can add photos."}</p>
       </div>
     </form>
   );

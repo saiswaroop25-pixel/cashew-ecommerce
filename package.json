@@ -16,7 +16,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "storage:setup": "tsx scripts/setup-storage.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.3",

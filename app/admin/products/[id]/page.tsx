@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DeleteProduct } from "@/components/admin/delete-product";
 import { ProductForm, type ProductDefaults } from "@/components/admin/product-form";
+import { ProductPhotos } from "@/components/admin/product-photos";
 import { PageHeader } from "@/components/admin/ui";
 import { paiseToRupeesString } from "@/lib/admin/text";
 import { requireAdmin } from "@/lib/auth/dal";
@@ -66,6 +67,7 @@ export default async function EditProductPage({
         />
       </div>
       {sp.created === "1" && <p role="status" className="mb-4 rounded-lg bg-forest/10 px-4 py-3 text-sm text-forest">Product created.</p>}
+      <div className="mb-8"><ProductPhotos productId={product.id} photos={product.images.map((i) => ({ id: i.id, url: i.url, alt: i.alt }))} /></div>
       <ProductForm defaults={defaults} options={options} />
       <section className="mt-10 rounded-card border border-red-200 bg-white p-6">
         <h2 className="font-serif text-xl text-red-800">Danger zone</h2>

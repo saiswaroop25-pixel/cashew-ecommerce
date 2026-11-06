@@ -112,6 +112,22 @@ describe("admin pages render against real data", () => {
     expect(out).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
   });
 
+  it("process page admin shows the video editor and all 13 steps with upload controls", async () => {
+    const { default: Page } = await import("@/app/admin/process/page");
+    const out = await html(Page());
+    for (const text of ["Main process video", "The 13 steps", "Video file", "Poster image", "Captions", "Publish video", "Save step"]) expect(out).toContain(text);
+    expect((out.match(/Save step/g) ?? []).length).toBe(13);
+    expect(out).toContain("WebVTT"); // upload rules are shown to the admin
+  });
+
+  it("product edit page now includes the photo manager", async () => {
+    const { default: Page } = await import("@/app/admin/products/[id]/page");
+    const out = await html(Page({ params: Promise.resolve({ id: productId }), searchParams: sp() }));
+    expect(out).toContain("Photos");
+    expect(out).toContain("Add a photo");
+    expect(out).toContain("JPEG, PNG, WebP or AVIF image up to 5 MB");
+  });
+
   it("activity log renders", async () => {
     const { default: Page } = await import("@/app/admin/activity/page");
     expect(await html(Page())).toContain("Activity log");
