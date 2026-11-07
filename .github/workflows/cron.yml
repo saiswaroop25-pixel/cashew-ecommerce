@@ -1,11 +1,21 @@
 # Expires unpaid orders every 15 minutes (Vercel Hobby crons are daily-only).
-# Repo secrets required: APP_URL (e.g. https://your-domain.com) and CRON_SECRET.
+# Repo secrets required: APP_URL (e.g. https://your-domain.com, no trailing slash) and CRON_SECRET.
 name: expire-orders
 on:
-  schedule: [{ cron: "*/15 * * * *" }]
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 jobs:
   expire:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ secrets.APP_URL }}/api/cron/expire-orders"
+      - name: Call the expiry endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "Add the APP_URL and CRON_SECRET repository secrets (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          curl -fsS -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/expire-orders"
