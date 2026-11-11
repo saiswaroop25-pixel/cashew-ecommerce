@@ -7,7 +7,7 @@ import { FormMessage } from "@/components/ui/field";
 import { getSessionUser } from "@/lib/auth/dal";
 import { safeNext } from "@/lib/auth/safe-next";
 
-export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
+export const metadata: Metadata = { title: "Sign in", description: "Sign in to view your orders, saved addresses and wishlist.", robots: { index: false } };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

@@ -1,9 +1,17 @@
 import Link from "next/link";
+import { cacheLife } from "next/cache";
 import { legalPages } from "@/lib/legal";
 import { whatsappLink } from "@/lib/whatsapp";
 import { getSite } from "@/services/site";
 
+async function currentYear() {
+  "use cache";
+  cacheLife("days");
+  return new Date().getFullYear();
+}
+
 export async function Footer() {
+  const year = await currentYear();
   const site = await getSite(); // company details from the admin settings (cached)
   const wa = whatsappLink(site.whatsapp, "Hello!");
   const social = [
@@ -51,7 +59,7 @@ export async function Footer() {
         </FooterList>
       </div>
       <div className="border-t border-cream/10 py-5 text-center text-xs text-cream/60">
-        © {site.name}. All rights reserved.
+        © {year} {site.name}. All rights reserved.
       </div>
     </footer>
   );

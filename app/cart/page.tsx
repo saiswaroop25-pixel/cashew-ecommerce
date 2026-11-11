@@ -8,7 +8,7 @@ import { LinkButton } from "@/components/ui/button";
 import { formatINR } from "@/lib/utils";
 import { getCartView } from "@/services/cart";
 
-export const metadata: Metadata = { title: "Your cart", robots: { index: false } };
+export const metadata: Metadata = { title: "Your cart", description: "Review the cashews in your cart before checkout.", robots: { index: false } };
 
 export default function CartPage() {
   return (

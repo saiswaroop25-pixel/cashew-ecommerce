@@ -12,7 +12,7 @@ type Params = Promise<{ slug: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const page = legalPages.find((p) => p.slug === slug);
-  return page ? { title: page.title, alternates: { canonical: `/legal/${slug}` } } : {};
+  return page ? { title: page.title, description: `${page.title} for our online cashew store.`, alternates: { canonical: `/legal/${slug}` } } : {};
 }
 
 // Unknown /legal/* addresses never reach here: proxy.ts answers them with a real 404 first.

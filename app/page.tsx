@@ -124,8 +124,13 @@ async function Featured() {
   );
 }
 
-// Business strengths must be substantiated, so these are placeholders until real details exist.
-const strengths = ["Product quality", "Freshness", "Quality control", "Packaging standards", "Sourcing practices", "Customer service"];
+// Statements here describe how this shop works, not claims about the business.
+const strengths = [
+  { title: "Clear grades", text: "Every product page states the grade and pack size, so you know exactly what you are buying." },
+  { title: "Homes and businesses", text: "Order a pack online, or send a bulk enquiry for a quotation." },
+  { title: "Secure payment", text: "Pay online through Razorpay; we never see your card details." },
+  { title: "Order updates", text: "Track your order from your account and receive updates by email." },
+];
 
 function WhyChooseUs() {
   return (
@@ -133,13 +138,11 @@ function WhyChooseUs() {
       <div className={container}>
         <p className="text-xs uppercase tracking-[0.3em] text-gold-text">Why choose us</p>
         <h2 className="mt-2 font-serif text-3xl text-forest md:text-4xl">What we stand for</h2>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {strengths.map((s) => (
-            <li key={s} className="rounded-card border border-cashew p-6">
-              <h3 className="font-serif text-xl text-chocolate">{s}</h3>
-              <p className="mt-2 text-sm text-brown">
-                Placeholder – the business will add verified details here.
-              </p>
+            <li key={s.title} className="rounded-card border border-cashew p-6">
+              <h3 className="font-serif text-xl text-chocolate">{s.title}</h3>
+              <p className="mt-2 text-sm text-brown">{s.text}</p>
             </li>
           ))}
         </ul>

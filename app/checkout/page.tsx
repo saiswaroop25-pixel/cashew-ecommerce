@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { formatINR } from "@/lib/utils";
 import { getCartView } from "@/services/cart";
 
-export const metadata: Metadata = { title: "Checkout", robots: { index: false } };
+export const metadata: Metadata = { title: "Checkout", description: "Enter your delivery details and pay securely.", robots: { index: false } };
 
 export default function CheckoutPage() {
   return (

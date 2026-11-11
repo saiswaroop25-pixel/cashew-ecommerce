@@ -5,7 +5,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { ResetForm } from "@/components/auth/forms";
 import { getSessionUser } from "@/lib/auth/dal";
 
-export const metadata: Metadata = { title: "Reset password", robots: { index: false } };
+export const metadata: Metadata = { title: "Reset password", description: "Choose a new password for your account.", robots: { index: false } };
 
 export default function ResetPasswordPage() {
   return (

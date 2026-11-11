@@ -5,7 +5,7 @@ import { AuthCard } from "@/components/auth/auth-card";
 import { RegisterForm } from "@/components/auth/forms";
 import { getSessionUser } from "@/lib/auth/dal";
 
-export const metadata: Metadata = { title: "Create account", robots: { index: false } };
+export const metadata: Metadata = { title: "Create account", description: "Create an account to track orders and check out faster.", robots: { index: false } };
 
 export default function RegisterPage() {
   return (
