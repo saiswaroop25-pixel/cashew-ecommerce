@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { safeNext } from "@/lib/auth/safe-next";
+import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 import { mergeGuestCart } from "@/services/cart";
@@ -75,7 +76,11 @@ export async function signIn(_prev: FormState, fd: FormData): Promise<FormState>
   }
   // Keep anything they added to the cart before signing in.
   if (data.user) await mergeGuestCart(data.user.id);
-  redirect(safeNext(fd.get("next")));
+  const requested = safeNext(fd.get("next"), "");
+  if (requested) redirect(requested);
+  // No specific page asked for: admins land in the dashboard, customers in their account.
+  const profile = data.user ? await prisma.profile.findUnique({ where: { id: data.user.id }, select: { role: true } }) : null;
+  redirect(profile?.role === "ADMIN" ? "/admin" : "/account");
 }
 
 export async function signOut() {

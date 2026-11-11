@@ -57,7 +57,7 @@ export function Header({ siteName, authSlot, cartSlot }: { siteName: string; aut
                 </Link>
               </li>
             ))}
-            <li className="px-3 py-3" onClick={() => setOpen(false)}>{authSlot}</li>
+            <li className="flex flex-wrap items-center gap-4 px-3 py-3" onClick={() => setOpen(false)}>{authSlot}</li>
           </ul>
         </nav>
       )}

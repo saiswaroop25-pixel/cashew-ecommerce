@@ -65,3 +65,10 @@ update "Profile" set role = 'ADMIN' where email = 'you@example.com';
 ## Not yet done
 
 - Shipping provider integration (Shiprocket/Delhivery): shipping is currently a demo rule (free above a threshold, otherwise flat). Real rates are needed from the business.
+
+## Email templates (Supabase)
+
+So that email links work from any browser or device, set these in Supabase → Authentication → Email Templates (the link must use the token, not `{{ .ConfirmationURL }}`):
+
+- **Reset Password:** `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">Reset your password</a>`
+- **Confirm signup:** `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup&next=/">Confirm your email</a>`

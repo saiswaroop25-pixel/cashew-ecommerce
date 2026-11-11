@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { AuthCard } from "@/components/auth/auth-card";
 import { LoginForm } from "@/components/auth/forms";
 import { FormMessage } from "@/components/ui/field";
-import { getSessionUser } from "@/lib/auth/dal";
+import { getProfile, getSessionUser } from "@/lib/auth/dal";
 import { safeNext } from "@/lib/auth/safe-next";
 
 export const metadata: Metadata = { title: "Sign in", description: "Sign in to view your orders, saved addresses and wishlist.", robots: { index: false } };
@@ -24,7 +24,12 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
 async function Body({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const next = typeof sp.next === "string" ? safeNext(sp.next, "") : "";
-  if (await getSessionUser()) redirect(next || "/account");
+  const user = await getSessionUser();
+  if (user) {
+    if (next) redirect(next);
+    const profile = await getProfile();
+    redirect(profile?.role === "ADMIN" ? "/admin" : "/account");
+  }
   return (
     <div className="space-y-4">
       {sp.error === "link" && (
