@@ -36,7 +36,7 @@ export const EMPTY_SETTINGS: SiteSettings = {
 export const site = {
   name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Your Cashew Brand",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  tagline: "Premium cashews, placeholder tagline",
+  tagline: "Premium cashews",
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "",
 } as const;
