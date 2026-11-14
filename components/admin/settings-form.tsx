@@ -47,6 +47,18 @@ export function SettingsForm({ saved }: { saved: SiteSettings }) {
       </section>
 
       <section className="space-y-4 rounded-card bg-white p-6 shadow-soft">
+        <h2 className="font-serif text-xl text-forest">Legal details</h2>
+        <p className="text-xs text-brown">Shown in the footer, on the Contact page and in the policies. Leave blank anything that does not apply to you. Indian food sellers must show their FSSAI licence number.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Registered business name" name="legalName" defaultValue={v("legalName")} error={e.legalName} maxLength={120} />
+          <Field label="GST number" name="gstin" defaultValue={v("gstin")} error={e.gstin} maxLength={15} />
+          <Field label="FSSAI licence number" name="fssai" inputMode="numeric" defaultValue={v("fssai")} error={e.fssai} maxLength={14} />
+          <Field label="Grievance officer name" name="grievanceName" defaultValue={v("grievanceName")} error={e.grievanceName} maxLength={80} hint="The person customers can complain to about orders or their data." />
+          <Field label="Grievance officer email" name="grievanceEmail" type="email" defaultValue={v("grievanceEmail")} error={e.grievanceEmail} />
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-card bg-white p-6 shadow-soft">
         <h2 className="font-serif text-xl text-forest">Social media</h2>
         <p className="text-xs text-brown">Full links starting with https://. Empty ones are not shown.</p>
         <div className="grid gap-4 sm:grid-cols-3">

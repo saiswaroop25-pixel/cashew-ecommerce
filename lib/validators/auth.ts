@@ -16,6 +16,7 @@ export const registerSchema = z
     email,
     password,
     confirmPassword: z.string(),
+    terms: z.literal("on", { error: "Please tick the box to agree to the Terms and Privacy Policy" }),
   })
   .refine((v) => v.password === v.confirmPassword, {
     path: ["confirmPassword"],

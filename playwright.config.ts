@@ -24,6 +24,8 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     channel: "msedge",
     trace: "retain-on-failure",
+    // Visitors who already dismissed the cookie notice, so it never covers the page under test (it has its own test).
+    storageState: { cookies: [], origins: [{ origin: `http://localhost:${PORT}`, localStorage: [{ name: "cookie-notice", value: "ok" }] }] },
   },
   projects: [
     { name: "desktop", use: { viewport: { width: 1280, height: 800 } } },

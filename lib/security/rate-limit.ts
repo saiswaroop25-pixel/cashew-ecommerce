@@ -15,6 +15,7 @@ export const POLICIES = {
   passwordReset: [{ scope: "ip", max: 6, windowSec: 3600 }, { scope: "identity", max: 3, windowSec: 3600 }],
   newsletter: [{ scope: "ip", max: 6, windowSec: 3600 }],
   bulkEnquiry: [{ scope: "ip", max: 6, windowSec: 3600 }],
+  dataRequest: [{ scope: "ip", max: 5, windowSec: 3600 }, { scope: "identity", max: 3, windowSec: 86400 }],
   checkout: [{ scope: "ip", max: 25, windowSec: 3600 }],
   payment: [{ scope: "ip", max: 40, windowSec: 3600 }],
   coupon: [{ scope: "ip", max: 20, windowSec: 600 }],

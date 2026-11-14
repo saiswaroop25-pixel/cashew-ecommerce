@@ -17,6 +17,15 @@ export type SiteSettings = {
   instagramUrl: string;
   facebookUrl: string;
   youtubeUrl: string;
+  /** Registered business name, if different from the shop name (shown on invoices and policies). */
+  legalName: string;
+  /** GST number (15 characters), if registered. */
+  gstin: string;
+  /** FSSAI food licence number (14 digits). Food sellers in India must show it. */
+  fssai: string;
+  /** Person who handles complaints and privacy requests, and the email to reach them. */
+  grievanceName: string;
+  grievanceEmail: string;
 };
 
 export const EMPTY_SETTINGS: SiteSettings = {
@@ -30,6 +39,11 @@ export const EMPTY_SETTINGS: SiteSettings = {
   instagramUrl: "",
   facebookUrl: "",
   youtubeUrl: "",
+  legalName: "",
+  gstin: "",
+  fssai: "",
+  grievanceName: "",
+  grievanceEmail: "",
 };
 
 /** Environment defaults (kept so the site works before anything is entered in the admin). */

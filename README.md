@@ -72,3 +72,12 @@ So that email links work from any browser or device, set these in Supabase → A
 
 - **Reset Password:** `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">Reset your password</a>`
 - **Confirm signup:** `<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup&next=/">Confirm your email</a>`
+
+## Legal and privacy
+
+- Policy text lives in `lib/policies.ts` (privacy, terms, refund and cancellation, shipping, cookies, credits). Business decisions such as how many hours a customer has to report a damaged pack, or how long refunds take, are the `POLICY_TERMS` constants at the top. Have a lawyer review the text before relying on it.
+- Business details (registered name, GST, FSSAI licence, grievance officer) are entered in `/admin/settings` and shown in the footer, on `/contact` and in the policies.
+- Cookies: only `cart_token` and the sign-in cookies are used; the cookie notice (`components/layout/cookie-notice.tsx`) says so. If you ever add analytics or advertising, add a real consent choice before loading them and update the Cookie Policy.
+- Data requests: `/data-request` stores a request and emails the person and `ADMIN_NOTIFICATION_EMAIL`. Handle them under `/admin/data-requests` (verify the email owner, delete what you can, keep records the law requires).
+- Marketing emails must carry an unsubscribe link and header (see `sendNewsletterWelcome` in `services/email.ts`).
+- Third parties used: Supabase (auth, database, storage), Razorpay (payments), Resend (email), Vercel (hosting). Fonts are self-hosted by Next (no request to Google).

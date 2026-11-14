@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { newsletterSchema, type NewsletterState } from "@/lib/validators/newsletter";
+import { sendNewsletterWelcome } from "@/services/email";
 import { rateLimited } from "@/services/rate-limit";
 
 const SUCCESS = "Thank you! You are subscribed. You can unsubscribe at any time.";
@@ -23,13 +24,17 @@ export async function subscribeNewsletter(_prev: NewsletterState, formData: Form
   }
 
   try {
-    await prisma.newsletterSubscription.upsert({
+    const before = await prisma.newsletterSubscription.findUnique({ where: { email: parsed.data.email }, select: { unsubscribedAt: true } });
+    const sub = await prisma.newsletterSubscription.upsert({
       where: { email: parsed.data.email },
       create: { email: parsed.data.email },
       // Re-subscribing records fresh consent. Same response either way, so the
       // form cannot be used to discover who is already on the list.
       update: { unsubscribedAt: null, consentGivenAt: new Date() },
     });
+    // The welcome email carries the unsubscribe link. A mail problem never fails the sign-up.
+    // Only for a new or returning subscriber, so the form cannot be used to flood someone else with email.
+    if (!before || before.unsubscribedAt) await sendNewsletterWelcome(sub.email, sub.unsubscribeToken).catch((e) => console.error("newsletter welcome email failed", e));
   } catch (err) {
     console.error("newsletter subscribe failed", err);
     return { ok: false, message: "Something went wrong. Please try again." };

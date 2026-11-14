@@ -8,7 +8,7 @@ import {
   resetSchema,
 } from "@/lib/validators/auth";
 
-const base = { fullName: "Asha Rao", email: " Asha@Example.COM ", password: "cashew123", confirmPassword: "cashew123" };
+const base = { fullName: "Asha Rao", email: " Asha@Example.COM ", password: "cashew123", confirmPassword: "cashew123", terms: "on" };
 
 describe("registerSchema", () => {
   it("accepts valid input and normalises the email", () => {
@@ -26,6 +26,15 @@ describe("registerSchema", () => {
     const r = registerSchema.safeParse({ ...base, confirmPassword: "different1" });
     expect(r.success).toBe(false);
     expect(!r.success && r.error.issues[0].path[0]).toBe("confirmPassword");
+  });
+});
+
+describe("registerSchema consent", () => {
+  it("requires the terms box to be ticked", () => {
+    const { terms: _t, ...without } = base;
+    const r = registerSchema.safeParse(without);
+    expect(r.success).toBe(false);
+    expect(!r.success && r.error.issues[0].path[0]).toBe("terms");
   });
 });
 

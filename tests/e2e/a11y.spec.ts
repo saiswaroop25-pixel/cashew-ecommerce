@@ -15,7 +15,11 @@ const PAGES = [
   ["login", "/login"],
   ["register", "/register"],
   ["privacy policy", "/legal/privacy-policy"],
+  ["terms", "/legal/terms"],
+  ["cookie policy", "/legal/cookie-policy"],
   ["photo credits", "/legal/photo-credits"],
+  ["contact", "/contact"],
+  ["data request", "/data-request"],
   ["404 page", "/definitely-missing"],
 ] as const;
 

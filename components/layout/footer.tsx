@@ -35,12 +35,14 @@ export async function Footer() {
           <Link href="/shop">Shop</Link>
           <Link href="/#process">Our process</Link>
           <Link href="/bulk-orders">Bulk orders</Link>
+          <Link href="/contact">Contact</Link>
         </FooterList>
 
         <FooterList title="Policies">
           {legalPages.map((p) => (
             <Link key={p.slug} href={`/legal/${p.slug}`}>{p.title}</Link>
           ))}
+          <Link href="/data-request">Your data: access or delete</Link>
         </FooterList>
 
         <FooterList title="Contact">
@@ -49,6 +51,12 @@ export async function Footer() {
           {wa && <a href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
           {site.address && <p className="whitespace-pre-line text-cream/70">{site.address}</p>}
           {!hasContact && <Link href="/bulk-orders">Send us an enquiry</Link>}
+          {(site.gstin || site.fssai) && (
+            <p className="mt-2 text-xs text-cream/70">
+              {site.gstin && <span className="block">GSTIN {site.gstin}</span>}
+              {site.fssai && <span className="block">FSSAI Lic. No. {site.fssai}</span>}
+            </p>
+          )}
           {social.length > 0 && (
             <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
               {social.map((s) => (
@@ -59,7 +67,7 @@ export async function Footer() {
         </FooterList>
       </div>
       <div className="border-t border-cream/10 py-5 text-center text-xs text-cream/60">
-        © {year} {site.name}. All rights reserved.
+        © {year} {site.legalName || site.name}. All rights reserved.
       </div>
     </footer>
   );

@@ -7,6 +7,7 @@ vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
 }));
 const site = vi.hoisted(() => ({ value: {} as Record<string, string> }));
+vi.mock("next/cache", () => ({ cacheLife: () => {}, cacheTag: () => {} }));
 vi.mock("@/services/site", () => ({ getSite: async () => site.value }));
 
 import { BannerStrip } from "@/components/home/banner-strip";

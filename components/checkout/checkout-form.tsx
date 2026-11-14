@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { placeOrder } from "@/app/actions/checkout";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,11 @@ export function CheckoutForm({
         </p>
       </section>
 
+      <p className="text-xs text-brown">
+        By continuing you agree to our <Link href="/legal/terms" className="underline" target="_blank">Terms of Service</Link>,{" "}
+        <Link href="/legal/returns-policy" className="underline" target="_blank">Refund &amp; Cancellation Policy</Link> and{" "}
+        <Link href="/legal/privacy-policy" className="underline" target="_blank">Privacy Policy</Link>. We use your details only to deliver this order.
+      </p>
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? "Placing order…" : "Continue to payment"}
       </Button>

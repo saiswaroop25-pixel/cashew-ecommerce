@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AuthNav } from "@/components/layout/auth-nav";
 import { CartLink } from "@/components/layout/cart-link";
 import { Footer } from "@/components/layout/footer";
+import { CookieNotice } from "@/components/layout/cookie-notice";
 import { Header } from "@/components/layout/header";
 import { JsonLdScript } from "@/components/seo/json-ld";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
@@ -80,6 +81,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
         <div id="main" className="flex flex-1 flex-col">{children}</div>
         <Footer />
+        <CookieNotice />
       </body>
     </html>
   );

@@ -27,13 +27,17 @@ export async function signUp(_prev: FormState, fd: FormData): Promise<FormState>
   const parsed = registerSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  // Implicit flow, like the password reset: the confirmation link then works in any browser or on a phone, not only
+  // in the browser that created the account (see app/auth/hash/page.tsx).
+  const signUpClient = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false },
+  });
+  const { data, error } = await signUpClient.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
-      emailRedirectTo: `${site.url}/auth/callback?next=/account`,
+      emailRedirectTo: `${site.url}/auth/hash?next=/account`,
     },
   });
 
@@ -49,7 +53,11 @@ export async function signUp(_prev: FormState, fd: FormData): Promise<FormState>
     };
   }
   // Email confirmation disabled in Supabase -> already signed in.
-  if (data.session) redirect("/account");
+  if (data.session) {
+    const supabase = await createClient();
+    await supabase.auth.setSession({ access_token: data.session.access_token, refresh_token: data.session.refresh_token });
+    redirect("/account");
+  }
 
   // Same message whether or not the address already exists (no account enumeration).
   return { ok: true, message: "Almost there! Check your email for a link to confirm your account." };

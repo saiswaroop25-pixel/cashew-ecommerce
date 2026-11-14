@@ -600,3 +600,17 @@ model RateLimit {
   @@id([key, windowStart])
   @@index([windowStart])
 }
+
+/// A person asking to see, correct or delete the data we hold about them. Handled by hand by the business.
+model DataRequest {
+  id        String    @id @default(cuid())
+  reference String    @unique
+  email     String
+  kind      String // "DELETE" | "ACCESS" | "CORRECT"
+  details   String?
+  status    String    @default("OPEN") // "OPEN" | "DONE"
+  createdAt DateTime  @default(now())
+  doneAt    DateTime?
+
+  @@index([status, createdAt])
+}

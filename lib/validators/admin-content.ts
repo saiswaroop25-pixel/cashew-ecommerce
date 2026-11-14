@@ -41,6 +41,28 @@ export const siteSettingsSchema = z.object({
   instagramUrl: httpsUrl("Instagram link"),
   facebookUrl: httpsUrl("Facebook link"),
   youtubeUrl: httpsUrl("YouTube link"),
+  legalName: text(120),
+  gstin: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .optional()
+    .transform((v) => v ?? "")
+    .refine((v) => v === "" || /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(v), "A GST number has 15 characters, like 22AAAAA0000A1Z5"),
+  fssai: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ?? "").replace(/\s/g, ""))
+    .refine((v) => v === "" || /^\d{14}$/.test(v), "An FSSAI licence number has 14 digits"),
+  grievanceName: text(80),
+  grievanceEmail: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .optional()
+    .transform((v) => v ?? "")
+    .refine((v) => v === "" || z.email().safeParse(v).success, "Enter a valid email address"),
 });
 export type SiteSettingsInput = z.infer<typeof siteSettingsSchema>;
 

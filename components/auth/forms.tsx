@@ -36,6 +36,16 @@ export function RegisterForm() {
       <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={s.values?.email} error={s.errors?.email} />
       <Field label="Password" name="password" type="password" autoComplete="new-password" required hint="At least 8 characters, with a letter and a number." error={s.errors?.password} />
       <Field label="Confirm password" name="confirmPassword" type="password" autoComplete="new-password" required error={s.errors?.confirmPassword} />
+      <div>
+        <label className="flex items-start gap-2 text-sm text-chocolate">
+          <input type="checkbox" name="terms" className="mt-1" defaultChecked={s.values?.terms === "on"} required />
+          <span>
+            I agree to the <Link href="/legal/terms" className="underline" target="_blank">Terms of Service</Link> and the{" "}
+            <Link href="/legal/privacy-policy" className="underline" target="_blank">Privacy Policy</Link>.
+          </span>
+        </label>
+        {s.errors?.terms && <p className="mt-1 text-xs text-red-700">{s.errors.terms}</p>}
+      </div>
       <Button type="submit" className="w-full" disabled={pending}>{pending ? "Creating account…" : "Create account"}</Button>
       <p className="text-sm text-brown">
         Already registered? <Link href="/login" className="text-forest underline">Sign in</Link>

@@ -55,7 +55,7 @@ test.describe("public pages", () => {
 
   test("legal pages and photo credits are reachable from the footer", async ({ page }) => {
     await page.goto("/");
-    for (const name of ["Privacy Policy", "Terms & Conditions", "Photo Credits"]) {
+    for (const name of ["Privacy Policy", "Terms of Service", "Credits & Licences"]) {
       await page.getByRole("contentinfo").getByRole("link", { name }).click();
       await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
       await page.goto("/");

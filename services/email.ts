@@ -16,7 +16,7 @@ let resend: Resend | undefined;
  * Without RESEND_API_KEY (or with a placeholder EMAIL_FROM) it logs and skips,
  * so local development works.
  */
-export async function sendEmail(args: { to: string; subject: string; html: string }): Promise<boolean> {
+export async function sendEmail(args: { to: string; subject: string; html: string; headers?: Record<string, string> }): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   if (!key || !from || /placeholder|example\.com/i.test(from)) {
@@ -25,7 +25,7 @@ export async function sendEmail(args: { to: string; subject: string; html: strin
   }
   try {
     resend ??= new Resend(key);
-    const { error } = await resend.emails.send({ from, to: args.to, subject: args.subject, html: args.html });
+    const { error } = await resend.emails.send({ from, to: args.to, subject: args.subject, html: args.html, headers: args.headers });
     if (error) {
       console.error("[email failed]", args.subject, error.name);
       return false;
@@ -172,5 +172,48 @@ export async function sendQuotationEmail(quotationId: string) {
       </table>
       ${q.terms ? `<p><strong>Terms</strong><br>${esc(q.terms).replace(/\n/g, "<br>")}</p>` : ""}
       <p>Reply to this email or contact us to confirm your order.</p>`),
+  });
+}
+
+/** Confirms a privacy request to the person, and tells the business. */
+export async function sendDataRequestEmails(requestId: string) {
+  const { name: siteName } = await getSite();
+  const r = await prisma.dataRequest.findUnique({ where: { id: requestId } });
+  if (!r) return;
+  const label = r.kind === "DELETE" ? "delete your data" : r.kind === "ACCESS" ? "send you a copy of your data" : "correct your data";
+  await sendEmail({
+    to: r.email,
+    subject: `We received your request ${r.reference}`,
+    html: wrap(siteName, `<h2 style="color:#344b35">We received your request</h2>
+      <p>You asked us to ${label}. Your reference is <strong>${esc(r.reference)}</strong>.</p>
+      <p>We will reply to this email address. To protect your data we may ask you to confirm it is you before we act, and we may need to keep some records the law requires (such as invoices).</p>
+      <p style="color:#795438;font-size:12px">If you did not make this request, you can ignore this email and nothing will happen.</p>`),
+  });
+  const admin = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (admin) {
+    await sendEmail({
+      to: admin,
+      subject: `Data request ${r.reference}: ${r.kind.toLowerCase()}`,
+      html: wrap(siteName, `<h2>Data request ${esc(r.reference)}</h2>
+        <p><strong>${esc(r.kind)}</strong> from ${esc(r.email)}</p>
+        ${r.details ? `<p>${esc(r.details).split("\n").join("<br>")}</p>` : ""}
+        <p>Confirm the person is the owner of that email address before you act. Mark it done under Admin, Data requests.</p>`),
+    });
+  } else {
+    console.warn(`[data request ${r.reference}] ADMIN_NOTIFICATION_EMAIL is not set - nobody was notified`);
+  }
+}
+
+/** Welcome email for a newsletter subscriber. Every marketing email carries an unsubscribe link and header. */
+export async function sendNewsletterWelcome(email: string, unsubscribeToken: string) {
+  const { name: siteName, url } = await getSite();
+  const link = `${url}/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
+  await sendEmail({
+    to: email,
+    subject: `You are subscribed to ${siteName}`,
+    headers: { "List-Unsubscribe": `<${link}>` },
+    html: wrap(siteName, `<h2 style="color:#344b35">Thank you for subscribing</h2>
+      <p>You will get occasional news and offers from ${esc(siteName)}. We will not share your address.</p>
+      <p style="font-size:13px">Changed your mind? <a href="${esc(link)}">Unsubscribe</a> at any time.</p>`),
   });
 }

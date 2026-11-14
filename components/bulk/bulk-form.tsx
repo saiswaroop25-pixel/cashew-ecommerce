@@ -7,6 +7,7 @@ import { Field, FormMessage } from "@/components/ui/field";
 import { FORM_LABELS, GRADE_LABELS, FORMS, GRADES } from "@/lib/validators/catalog";
 import { PACKAGING_OPTIONS } from "@/lib/validators/bulk";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { bulkEnquiryWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
 
 const initial: BulkFormState = { ok: false };
@@ -106,7 +107,7 @@ export function BulkForm({
       <div>
         <label className="flex items-start gap-2 text-sm text-chocolate">
           <input type="checkbox" name="consent" className="mt-1" defaultChecked={s.values?.consent === "on"} required />
-          I agree that you may contact me about this enquiry using the details above.
+          I agree that you may contact me about this enquiry using the details above. <Link href="/legal/privacy-policy" className="underline" target="_blank">Privacy Policy</Link>.
         </label>
         {e.consent && <p className="mt-1 text-xs text-red-700">{e.consent}</p>}
       </div>
