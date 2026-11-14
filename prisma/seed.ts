@@ -29,12 +29,12 @@ type P = {
   pricePer250: number; // paise
 };
 const products: P[] = [
-  { slug: "demo-raw-whole-w180", name: "Raw Whole Cashews W180 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W180", featured: true, popularity: 90, pricePer250: 32500 },
-  { slug: "demo-raw-whole-w240", name: "Raw Whole Cashews W240 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W240", featured: true, popularity: 80, pricePer250: 29500 },
-  { slug: "demo-raw-whole-w320", name: "Raw Whole Cashews W320 (Demo)", cat: "whole-cashews", form: "RAW", grade: "W320", popularity: 60, pricePer250: 26500 },
-  { slug: "demo-roasted-w240", name: "Roasted Cashews W240 (Demo)", cat: "roasted-salted", form: "ROASTED", grade: "W240", featured: true, popularity: 70, pricePer250: 31000 },
-  { slug: "demo-salted-w320", name: "Salted Cashews W320 (Demo)", cat: "roasted-salted", form: "SALTED", grade: "W320", popularity: 50, pricePer250: 28000 },
-  { slug: "demo-broken-bb", name: "Broken Cashews (Demo)", cat: "broken-cashews", form: "BROKEN", grade: "BROKEN_BB", popularity: 30, pricePer250: 18000 },
+  { slug: "raw-whole-w180", name: "Raw Whole Cashews W180", cat: "whole-cashews", form: "RAW", grade: "W180", featured: true, popularity: 90, pricePer250: 32500 },
+  { slug: "raw-whole-w240", name: "Raw Whole Cashews W240", cat: "whole-cashews", form: "RAW", grade: "W240", featured: true, popularity: 80, pricePer250: 29500 },
+  { slug: "raw-whole-w320", name: "Raw Whole Cashews W320", cat: "whole-cashews", form: "RAW", grade: "W320", popularity: 60, pricePer250: 26500 },
+  { slug: "roasted-w240", name: "Roasted Cashews W240", cat: "roasted-salted", form: "ROASTED", grade: "W240", featured: true, popularity: 70, pricePer250: 31000 },
+  { slug: "salted-w320", name: "Salted Cashews W320", cat: "roasted-salted", form: "SALTED", grade: "W320", popularity: 50, pricePer250: 28000 },
+  { slug: "broken-bb", name: "Broken Cashews", cat: "broken-cashews", form: "BROKEN", grade: "BROKEN_BB", popularity: 30, pricePer250: 18000 },
 ];
 const packs = [
   { label: "250 g", grams: 250, mult: 1 },

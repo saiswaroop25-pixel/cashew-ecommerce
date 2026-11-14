@@ -6,16 +6,16 @@ test.describe("public pages", () => {
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Cashews, chosen with care");
-    await expect(page.getByRole("link", { name: "Shop now" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Explore bulk orders" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("sold by the grade");
+    await expect(page.getByRole("link", { name: "Shop cashews" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "How grades work" })).toBeVisible();
 
     const hero = page.getByAltText(/basket filled with whole/i);
     await expect(hero).toBeVisible();
     expect(await hero.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
 
-    await expect(page.getByRole("heading", { name: "Featured cashews" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "From fruit to finished pack" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Start with these" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "How a cashew gets to you" })).toBeVisible();
     expect(errors).toEqual([]);
   });
 

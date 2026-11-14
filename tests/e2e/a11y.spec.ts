@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 const PAGES = [
   ["home", "/"],
   ["shop", "/shop"],
-  ["product", "/products/demo-raw-whole-w180"],
+  ["product", "/products/raw-whole-w180"],
   ["bulk orders", "/bulk-orders"],
   ["cart", "/cart"],
   ["login", "/login"],
@@ -42,8 +42,8 @@ test("keyboard: the first Tab stop on the home page is visible and focus can rea
   expect(focused?.visible).toBe(true);
   for (let i = 0; i < 12; i++) {
     const name = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.textContent?.trim() ?? "");
-    if (name === "Shop now") return;
+    if (name === "Shop cashews") return;
     await page.keyboard.press("Tab");
   }
-  throw new Error("Could not reach 'Shop now' with the keyboard in 12 Tab presses");
+  throw new Error("Could not reach 'Shop cashews' with the keyboard in 12 Tab presses");
 });

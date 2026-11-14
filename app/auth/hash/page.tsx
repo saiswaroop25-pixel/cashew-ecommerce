@@ -21,13 +21,15 @@ export default function AuthHash() {
       window.location.replace("/login?error=link");
       return;
     }
-    getSupabaseBrowser()
-      .auth.setSession({ access_token, refresh_token })
-      .then(({ error }) => {
+    (async () => {
+      try {
+        const { error } = await getSupabaseBrowser().auth.setSession({ access_token, refresh_token });
         if (error) setFailed(true);
         else window.location.replace(next);
-      })
-      .catch(() => setFailed(true));
+      } catch {
+        setFailed(true);
+      }
+    })();
   }, []);
 
   return (

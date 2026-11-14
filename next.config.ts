@@ -15,6 +15,10 @@ const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false, // do not advertise the framework
+  async redirects() {
+    // Earlier product addresses started with "demo-"; keep any saved link working.
+    return [{ source: "/products/demo-:slug", destination: "/products/:slug", permanent: true }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders({ isDev, supabaseHost }) },
