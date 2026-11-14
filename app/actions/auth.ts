@@ -1,5 +1,6 @@
 "use server";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { safeNext } from "@/lib/auth/safe-next";
 import { prisma } from "@/lib/prisma";
@@ -96,9 +97,13 @@ export async function requestPasswordReset(_prev: FormState, fd: FormData): Prom
   const parsed = forgotSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error), values };
 
-  const supabase = await createClient();
+  // Implicit flow on purpose: the default (PKCE) link only works in the browser that requested it, which breaks
+  // links opened on a phone or in a mail app. This link works anywhere (see app/auth/hash/page.tsx).
+  const supabase = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false },
+  });
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${site.url}/auth/callback?next=/reset-password`,
+    redirectTo: `${site.url}/auth/hash?next=/reset-password`,
   });
   if (error) console.error("resetPasswordForEmail failed", error.code, error.status);
   // Identical response regardless of outcome.
