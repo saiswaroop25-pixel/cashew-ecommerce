@@ -31,7 +31,8 @@ describe("registerSchema", () => {
 
 describe("registerSchema consent", () => {
   it("requires the terms box to be ticked", () => {
-    const { terms: _t, ...without } = base;
+    const without: Partial<typeof base> = { ...base };
+    delete without.terms;
     const r = registerSchema.safeParse(without);
     expect(r.success).toBe(false);
     expect(!r.success && r.error.issues[0].path[0]).toBe("terms");

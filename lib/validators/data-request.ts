@@ -1,12 +1,11 @@
 import { z } from "zod";
 
-export const DATA_REQUEST_KINDS = ["DELETE", "ACCESS", "CORRECT"] as const;
+export const DATA_REQUEST_KINDS = ["DELETE", "ACCESS"] as const;
 export type DataRequestKind = (typeof DATA_REQUEST_KINDS)[number];
 
 export const DATA_REQUEST_LABELS: Record<DataRequestKind, string> = {
   DELETE: "Delete my data",
-  ACCESS: "Send me a copy of my data",
-  CORRECT: "Correct my data",
+  ACCESS: "Send me a copy of my data, or correct it",
 };
 
 export const dataRequestSchema = z.object({

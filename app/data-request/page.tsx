@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Your data: access, correct or delete",
   description: "Ask us to send you a copy of your personal data, correct it or delete it.",
   alternates: { canonical: "/data-request" },
+  robots: { index: false }, // a utility form, not something to find through search
 };
 
 export default function DataRequestPage() {

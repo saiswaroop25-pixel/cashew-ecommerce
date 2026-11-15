@@ -180,7 +180,7 @@ export async function sendDataRequestEmails(requestId: string) {
   const { name: siteName } = await getSite();
   const r = await prisma.dataRequest.findUnique({ where: { id: requestId } });
   if (!r) return;
-  const label = r.kind === "DELETE" ? "delete your data" : r.kind === "ACCESS" ? "send you a copy of your data" : "correct your data";
+  const label = r.kind === "DELETE" ? "delete your data" : "send you a copy of your data or correct it";
   await sendEmail({
     to: r.email,
     subject: `We received your request ${r.reference}`,
